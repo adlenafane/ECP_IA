@@ -1,0 +1,68 @@
+Réception de UPD
+Cell(2,2) = 1/0/0
+Cell(2,3) = 0/0/2
+Cell(4,4) = 1/0/0
+Cell(5,4) = 0/2/0
+
+Déplacement de 1 vampire(s) de (5,4) à (4,4)
+
+Réception de UPD
+Cell(5,4) = 0/1/0
+Cell(4,4) = 0/2/0
+
+Déplacement de 2 vampire(s) de (4,4) à (3,4)
+
+Réception de UPD
+Cell(4,4) = 0/0/0
+Cell(3,4) = 0/2/0
+
+Déplacement de 2 vampire(s) de (3,4) à (2,4)
+
+Réception de UPD
+Cell(3,4) = 0/0/0
+Cell(2,4) = 0/2/0
+
+Mode d'emploi:
+- ouvrez le fichier .config et indiquez l'adresse ip de votre machine, ou 127.0.0.1 pour du local
+- mettez l'option trace à False si vous ne voulez pas du log
+- lancez le programme
+
+
+De votre côté vous devez faire ces actions et recevoir ces mises à jour:
+
+Déplacement de 1 vampire(s) de (5,4) à (5,3)
+
+Réception de UPD
+Cell(5,4) = 0/0/0
+Cell(5,3) = 0/1/0
+
+Déplacement de 1 vampire(s) de (5,3) à (5,2)
+
+Réception de UPD
+Cell(5,3) = 0/0/0
+Cell(5,2) = 0/1/0
+
+Déplacement de 1 vampire(s) de (5,2) à (4,2)
+
+Réception de UPD
+Cell(5,2) = 0/0/0
+Cell(4,2) = 0/1/0
+
+Déplacement de 1 vampire(s) de (4,2) à (3,2)
+
+Réception de UPD
+Cell(4,2) = 0/0/0
+Cell(3,2) = 0/1/0
+
+Déplacement de 1 vampire(s) de (3,2) à (2,2)
+
+Réception de UPD
+Cell(3,2) = 0/0/0
+Cell(2,2) = 0/2/0
+
+Déplacement de 1 vampire(s) de (2,2) à (3,3)
+Réception de UPD
+Cell(2,2) = 0/1/0
+Cell(3,3) = 0/1/0
+
+Attaque sur (2,3)
