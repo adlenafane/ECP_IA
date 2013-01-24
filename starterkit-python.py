@@ -31,29 +31,44 @@ sock = client.s
 #Envoi du nom
 groupname = "1" #mettez ici le nom de votre equipe
 send(sock, "NME", len(groupname), groupname)
+print "hello"
+print data
 
 #boucle principale
 while True:
     order = sock.recv(3)
     print order
-    if not data:
-        print("Bizarre, c'est vide")
+
 
     if order == "SET":
         lignes, colonnes = (struct.unpack('=B', sock.recv(1))[0] for i in range(2))
         #ici faire ce qu'il faut pour preparer votre representation de la carte
         board = [[0]*lignes]*colonnes
+            #0: cases vides
+            #1: maison (de n'importe quel type)
+            #2: notre HME
+            
+
+
+
     elif order == "HUM":
         n = struct.unpack('=B', sock.recv(1))[0]
         maisons = []
         for i in range(n):
             maisons.append((struct.unpack('=B', sock.recv(1))[0] for i in range(2)))
-        #maisons contient la liste des coordonnees des maisons
-        #ajoutez votre code ici
+        #maisons contient la liste des coordonnees des maisons ajoutez votre code ici
+        for maison in maisons:
+            board[maison[0]][maison[1]]=1
+
+
+
     elif order == "HME":
         x, y = (struct.unpack('=B', sock.recv(1))[0] for i in range(2))
-        #ajoutez le code ici (x,y) etant les coordonnees de votre
-        #maison
+        #ajoutez le code ici (x,y) etant les coordonnees de votre maison
+        board[x][y]=2
+
+
+
     elif order == "UPD":
         n = struct.unpack('=B', sock.recv(1))[0]
         changes = []
@@ -64,23 +79,36 @@ while True:
         #preparez la trame MOV ou ATK
         #Par exemple:
         send(sock, "MOV", 1,2,1,1,3)
+
+
+
     elif order == "MAP":
         n = struct.unpack('=B', sock.recv(1))[0]
         changes = []
         for i in range(n):
             changes.append((struct.unpack('=B', sock.recv(1))[0] for i in range(n)))
         #initialisez votre carte a partir des tuples contenus dans changes
+
+
+
     elif order == "END":
-        #ici on met fin a la partie en cours
-        #Reinitialisez votre modele
+        #ici on met fin a la partie en cours Reinitialisez votre modele
         break
+
+
+
     elif order == "BYE":
         break
+
+
+
     else:
         print("commande non attendue recue", order)
 
 #Preparez ici la deconnexion
                 
+
+
 #Fermeture de la socket
     sock.close()
 
