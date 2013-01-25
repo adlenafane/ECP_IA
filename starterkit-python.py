@@ -2,8 +2,10 @@
 import socket, struct
 
 data = []
+nb_tours = 0
 def send(sock, *messages):
     """Send a given set of messages to the server."""
+    global data
     for message in messages:
 	try:
             data = struct.pack('=B', message) if isinstance(message, int) else message
@@ -47,13 +49,10 @@ while True:
         #ici faire ce qu'il faut pour preparer votre representation de la carte
         board = [[0]*lignes]*colonnes
         print board
-            #0: cases vides
-            #1: maison (de n'importe quel type)
-            #2: notre HME
-            #(type,n): case occupée par npersonnages de type:(0 pour les humains, 1 pour nous, 2 pour les ennemis) de joueurs
-
-
-
+        #0: cases vides
+        #1: maison (de n'importe quel type)
+        #2: notre HME
+        #(type,n): case occupée par npersonnages de type:(0 pour les humains, 1 pour nous, 2 pour les ennemis) de joueurs
 
     elif order == "HUM":
         print "on entre dans le if order == HUM"
@@ -80,6 +79,7 @@ while True:
 
 
     elif order == "UPD":
+        nb_tours+=1
         n = struct.unpack('=B', sock.recv(1))[0]
         changes = []
         for i in range(n):
@@ -105,7 +105,7 @@ while True:
 
         #preparez la trame MOV ou ATK
         #Par exemple: un ordre MOV qui fonctionne mais "ne respecte pas les regles" (je sais pas pk)
-        #send(sock, "MOV", 2,5,4,2,4,4,5,4,1,5,3) #arg: "MOV" est suivi du nombre de quintuplets de deplacement n, puis des n quintuplets: (Xdepart, Ydepart, nb de pers a deplacer, X arrivee, Y arrivee)
+        send(sock, "MOV", 2,5,4,2,4,4,5,4,1,5,3) #arg: "MOV" est suivi du nombre de quintuplets de deplacement n, puis des n quintuplets: (Xdepart, Ydepart, nb de pers a deplacer, X arrivee, Y arrivee)
         
         #un ex d'ordre ATK qui fonctionne:
         send(sock, "ATK",4,4)
