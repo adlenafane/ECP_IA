@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import socket, struct
 
 data = []
@@ -29,7 +30,7 @@ client = Client()
 sock = client.s
 
 #Envoi du nom
-groupname = "1" #mettez ici le nom de votre equipe
+groupname = "les gerriers" #mettez ici le nom de votre equipe
 send(sock, "NME", len(groupname), groupname)
 print "hello"
 print data
@@ -38,27 +39,36 @@ print data
 while True:
     order = sock.recv(3)
     print order
-
+    if not data:
+        print("Bizarre, c'est vide")
 
     if order == "SET":
-        lignes, colonnes = (struct.unpack('=B', sock.recv(1))[0] for i in range(2))
+        lignes, colonnes = (struct.unpack('=B', sock.recv(1))[0] for i in range(2))   #B est le format pour unsigned char donc sock.recv(1) permet de lire 1 entier. The result of struct.unpack(format, string) is a tuple even if it contains exactly one item. l'opération est faite 2 fois pour récupérer ligne et colonne.
         #ici faire ce qu'il faut pour preparer votre representation de la carte
         board = [[0]*lignes]*colonnes
+        print board
             #0: cases vides
             #1: maison (de n'importe quel type)
             #2: notre HME
-            
+            #(type,n): case occupée par npersonnages de type:(0 pour les humains, 1 pour nous, 2 pour les ennemis) de joueurs
+
 
 
 
     elif order == "HUM":
+        print "on entre dans le if order == HUM"
         n = struct.unpack('=B', sock.recv(1))[0]
+        print n
         maisons = []
         for i in range(n):
-            maisons.append((struct.unpack('=B', sock.recv(1))[0] for i in range(2)))
+            x,y=(struct.unpack('=B', sock.recv(1))[0] for i in range(2)) #on génere la liste de tuples de coordonnées des maisons (humains)
+            print x,y
+            maisons.append((x,y)) #on génere la liste de tuples de coordonnées
+        print maisons
         #maisons contient la liste des coordonnees des maisons ajoutez votre code ici
         for maison in maisons:
             board[maison[0]][maison[1]]=1
+        print board
 
 
 
@@ -73,22 +83,53 @@ while True:
         n = struct.unpack('=B', sock.recv(1))[0]
         changes = []
         for i in range(n):
-            changes.append((struct.unpack('=B', sock.recv(1))[0] for i in range(5)))
-        #mettez a jour votre carte a partir des tuples contenus dans changes
-        #calculez votre coup
-        #preparez la trame MOV ou ATK
-        #Par exemple:
-        send(sock, "MOV", 1,2,1,1,3)
+            x,y,humanNB,vampNB,wwNB = (struct.unpack('=B', sock.recv(1))[0] for i in range(5))
+            changes.append((x,y,humanNB,vampNB,wwNB))
+        #initialisez votre carte a partir des tuples contenus dans changes
+        for change in changes:
+            if change[2]!=0:
+                board[change[0]][change[1]]=(0, change[2])
+            elif change[3]!=0:
+                board[change[0]][change[1]]=(0, change[3])
+            elif change[4]!=0:
+                board[change[0]][change[1]]=(0, change[4])
+            elif (change[2]==0 and change[3]==0 and change[4]==0):
+                board[change[0]][change[1]]=0
+            else:
+                print "je n'ai pas compris l'ordre UPD"
+            print board
 
+        #calculez votre coup
+        #calculcoup(board)
+
+
+        #preparez la trame MOV ou ATK
+        #Par exemple: un ordre MOV qui fonctionne mais "ne respecte pas les regles" (je sais pas pk)
+        #send(sock, "MOV", 2,5,4,2,4,4,5,4,1,5,3) #arg: "MOV" est suivi du nombre de quintuplets de deplacement n, puis des n quintuplets: (Xdepart, Ydepart, nb de pers a deplacer, X arrivee, Y arrivee)
+        
+        #un ex d'ordre ATK qui fonctionne:
+        send(sock, "ATK",4,4)
 
 
     elif order == "MAP":
         n = struct.unpack('=B', sock.recv(1))[0]
         changes = []
         for i in range(n):
-            changes.append((struct.unpack('=B', sock.recv(1))[0] for i in range(n)))
+            x,y,humanNB,vampNB,wwNB = (struct.unpack('=B', sock.recv(1))[0] for i in range(5))
+            changes.append((x,y,humanNB,vampNB,wwNB))
         #initialisez votre carte a partir des tuples contenus dans changes
-
+        for change in changes:
+            if change[2]!=0:
+                board[change[0]][change[1]]=(0, change[2])
+            elif change[3]!=0:
+                board[change[0]][change[1]]=(0, change[3])
+            elif change[4]!=0:
+                board[change[0]][change[1]]=(0, change[4])
+            elif (change[2]==0 and change[3]==0 and change[4]==0):
+                board[change[0]][change[1]]=0
+            else:
+                print "je n'ai pas compris l'ordre MAP"
+            print board
 
 
     elif order == "END":
@@ -110,7 +151,7 @@ while True:
 
 
 #Fermeture de la socket
-    sock.close()
+sock.close()
 
 
 
