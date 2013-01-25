@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import socket, struct
 from pprint import pprint
 
@@ -62,10 +63,18 @@ while True:
         print maisons
         #maisons contient la liste des coordonnees des maisons ajoutez votre code ici
         for maison in maisons:
+            print "\n\n\nC'est la qu'il y a un pb: "
+            print maison[0]
+            print maison[1]
+            print board[maison[0]]
+            print board[maison[0]][maison[1]]
             board[maison[0]][maison[1]]=('h',0)
+            pprint(board)
+        print "\n\n"
+        board[1] = ('test',0)
         pprint(board)
-        
-
+        print " #################### fin du HME ###################"
+        print "\n\n"
 
     elif order == "HME":
         x, y = (struct.unpack('=B', sock.recv(1))[0] for i in range(2))
@@ -158,10 +167,3 @@ while True:
 
 #Fermeture de la socket
 sock.close()
-
-
-
-
-
-
->>>>>>> pb sur le chargement de board a traiter
