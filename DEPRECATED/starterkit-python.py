@@ -31,7 +31,7 @@ send(sock, "NME", len(groupname), groupname)
 print data
 global home  #stock le tuple de coodonnees de notre maison. variable qui servira a identifier si on est des v ou des w
 global nous  #variable qui contiendra 'v' si on est des v ou 'w' si on est des w
-print " #################### fin de l'initialisation de la connexion ###################"
+print "#################### fin de l'initialisation de la connexion ###################"
 print "\n\n"
 
 

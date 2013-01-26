@@ -12,7 +12,6 @@ def send(sock, *messages):
     global data
     for message in messages:
         try:
-            print message
             data = struct.pack('=B', message) if isinstance(message, int) else message
             print data
             sock.send(data)
@@ -137,7 +136,7 @@ while True:
             print "debut d'une boucle de while"
             direction= choice(['u','ur','r','dr','d','dl','l','ul'])
             print direction
-            coord = next_coord(Xsize-1, Ysize-1, coord_start, direction)
+            coord = next_coord(Xsize, Ysize, coord_start, direction)
             print coord
 
         print coord
