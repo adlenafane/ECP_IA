@@ -14,9 +14,10 @@ ToDo
 
 * on garde le board en liste de liste ou on fait un dictionaire {tuple de coordonnees : (type,nombre)}
 
-* coder une fonction getOurPositions:
-	entree: board
+* coder une fonction getOurPositions: -> done pour la version dico !
+	entree: board, nous
 	retourne: liste de tuples qui nous donne nos positions
+	
 
 * une fonction anyEnnemyClose()
 	entree: board

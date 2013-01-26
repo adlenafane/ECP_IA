@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import socket, struct
 from pprint import pprint
+from utility import *
+from random import choice
 
 
 data = []
@@ -10,6 +12,7 @@ def send(sock, *messages):
     global data
     for message in messages:
         try:
+            print message
             data = struct.pack('=B', message) if isinstance(message, int) else message
             print data
             sock.send(data)
@@ -31,7 +34,10 @@ send(sock, "NME", len(groupname), groupname)
 print data
 global home  #stock le tuple de coodonnees de notre maison. variable qui servira a identifier si on est des v ou des w
 global nous  #variable qui contiendra 'v' si on est des v ou 'w' si on est des w
-print " #################### fin de l'initialisation de la connexion ###################"
+global Xsize
+global Ysize
+
+print "#################### fin de l'initialisation de la connexion ###################"
 print "\n\n"
 
 
@@ -40,14 +46,16 @@ while True:
     order = sock.recv(3)
     print order
     if not data:
-        print("Bizarre, c'est vide")
+        print("Bizarre, c'est vide. Aucun ordre n'a du etre envoyé au serveur au tour precedant")
 
     if order == "SET":
+        global Xsize
+        global Ysize
         lignes, colonnes = (struct.unpack('=B', sock.recv(1))[0] for i in range(2))   #B est le format pour unsigned char donc sock.recv(1) permet de lire 1 entier. The result of struct.unpack(format, string) is a tuple even if it contains exactly one item. l'opération est faite 2 fois pour récupérer ligne et colonne.
         #ici faire ce qu'il faut pour preparer votre representation de la carte
-        board = [[(0,0)]*colonnes for _ in range(lignes)]
-        pprint(board)
-        #(0,0): cases vides
+        board = {}
+        Xsize = lignes
+        Ysize = colonnes
         #(type,n): case occupée par n personnages de type:
                                 #'h' pour les humains
                                 #'v' pour les vampires
@@ -65,8 +73,9 @@ while True:
         print maisons
         #maisons contient la liste des coordonnees des maisons ajoutez votre code ici
         for maison in maisons:
-            board[maison[1]][maison[0]]=('h',0)
-            pprint(board)
+            board[maison]=('h',0)
+        print "Mise a jour du board: "
+        pprint(board)
         print "\n\n"
         print "#################### fin du HUM ###################"
         print "\n\n"
@@ -76,7 +85,7 @@ while True:
     elif order == "HME":
         x, y = (struct.unpack('=B', sock.recv(1))[0] for i in range(2))
         #ajoutez le code ici (x,y) etant les coordonnees de votre maison
-        board[y][x]=('nous',0)
+        board[(x,y)]=('nous',0)
         global home
         home=(x,y)
         print home
@@ -97,25 +106,52 @@ while True:
         #initialisez votre carte a partir des tuples contenus dans changes
         for change in changes:
             if change[2]!=0:
-                board[change[1]][change[0]]=('h', change[2])
+                board[(change[0],change[1])]=('h', change[2])
             elif change[3]!=0:
-                board[change[1]][change[0]]=('v', change[3])
+                board[(change[0],change[1])]=('v', change[3])
             elif change[4]!=0:
-                board[change[1]][change[0]]=('w', change[4])
+                board[(change[0],change[1])]=('w', change[4])
             elif (change[2]==0 and change[3]==0 and change[4]==0):
-                board[change[1]][change[0]]=(0,0)
+                k = (change[0],change[1])
+                try:
+                    del board[k]
+                except:
+                    print "UPD a transmis une case vide qui etait deja vide"
             else:
                 print "je n'ai pas compris l'ordre UPD"
         pprint(board)
 
         #calculez votre coup
+        
+        ourPositions = getOurPositions(board, nous)
         #calculcoup(board,nous,nb_tours)
+        coord_start = ourPositions[0][0]
+        print coord_start
 
+
+        coord=coord_start
+        print coord
+
+
+        while (coord==coord_start):
+            print "debut d'une boucle de while"
+            direction= choice(['u','ur','r','dr','d','dl','l','ul'])
+            print direction
+            coord = next_coord(Xsize-1, Ysize-1, coord_start, direction)
+            print coord
+
+        print coord
 
         #preparez la trame MOV ou ATK
         #Par exemple: un ordre MOV qui fonctionne mais "ne respecte pas les regles" (je sais pas pk)
-        send(sock, "MOV", 2,5,4,2,4,4,5,4,1,5,3) #arg: "MOV" est suivi du nombre de quintuplets de deplacement n, puis des n quintuplets: (Xdepart, Ydepart, nb de pers a deplacer, X arrivee, Y arrivee)
-        
+        #arg: "MOV" est suivi du nombre de quintuplets de deplacement n, puis des n quintuplets: (Xdepart, Ydepart, nb de pers a deplacer, X arrivee, Y arrivee)
+        print coord_start[0], coord_start[1], ourPositions[0][1],coord[0],coord[1]
+
+
+        send(sock, "MOV", 1,coord_start[0], coord_start[1], ourPositions[0][1],coord[0],coord[1])
+        """
+        send(sock, "MOV", 1,5,4,3,4,3)
+        """
         #un ex d'ordre ATK qui fonctionne:
         #send(sock, "ATK",4,4) #arg: "ATK" suivi des coordonnées de la cellule cible
         print "#################### fin du UPD ###################"
@@ -132,18 +168,22 @@ while True:
         #initialisez votre carte a partir des tuples contenus dans changes
         for change in changes:
             if change[2]!=0:
-                board[change[1]][change[0]]=('h', change[2])
+                board[(change[0],change[1])]=('h', change[2])
             elif change[3]!=0:
-                board[change[1]][change[0]]=('v', change[3])
+                board[(change[0],change[1])]=('v', change[3])
             elif change[4]!=0:
-                board[change[1]][change[0]]=('w', change[4])
+                board[(change[0],change[1])]=('w', change[4])
             elif (change[2]==0 and change[3]==0 and change[4]==0):
-                board[change[1]][change[0]]==(0,0)
+                k = (change[0],change[1])
+                try:
+                    del board[k]
+                except:
+                    print "UPD a transmis une case vide qui etait deja vide"
             else:
                 print "je n'ai pas compris l'ordre MAP"
         global nous
-        nous = board[home[1]][home[0]][0]  #enregistre 'v' ou 'w' dans la variable nous
-        print nous
+        nous = board[(home[0],home[1])] [0]  #enregistre 'v' ou 'w' dans la variable nous
+        print "nous sommes de type: %s" %nous
         pprint(board)
         print "#################### fin du MAP ###################"
         print "\n\n"
