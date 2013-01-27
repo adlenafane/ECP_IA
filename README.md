@@ -19,6 +19,15 @@ ToDo
 	retourne: liste de tuples qui nous donne nos positions
 	
 
+* getHumanNumber(board):
+	entree: board
+	retourne le nombre d'humains restants sur le plateau
+
+* getEnnemyNumber(board, nous):
+	entree: board, nous
+	retourne le nombre d'ennemis restants sur le plateau
+	
+
 * une fonction anyEnnemyClose()
 	entree: board
 	retourne: un dico avec en clé: tuple de positions des ennemis qui snt adjacents à une de nos positions, et en valeur un tuple (tuples de nos positions mmenacées, nombre de nos creatures présentes sur cette case)
