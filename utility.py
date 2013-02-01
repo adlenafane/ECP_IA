@@ -58,12 +58,42 @@ def anyHumanClose():
     retourne: un dico avec en clé: tuple de positions des humains qui snt adjacents à une de nos positions, et en valeur un tuple (tuples de nos positions mmenacées, nombre de nos creatures présentes sur cette case)
     """
 
-def attack():
+def attack(targetPosition):
     """
-    entree: tuple de coordonnes de la cellule a attaquer
+    entree: tuple de coordonnes de la cellule a attaquer et board
     nb: faire un test si la cellule cible est bien une cellule a notre portee
     retourne: le send correctement formaté
     """
+    adjacentsList=getAdjacentPositions(targetPosition)
+    if checkPresence(adjacentsList,config.board)==False:
+        return "Cellule hors de portee"
+    else:
+        #Lancer ordre attaque
+        return send(sock,"ATK",targetPosition[0],targetPosition[1])
+
+def checkPresence(adjacentsList):
+    """
+    Entree: liste de tuples de positions
+    Sortie: True ou False selon presence de nous dans au moins une de ces cases
+    """
+    for tuplePosition in adjacentsList:
+        if tuplePosition in config.board:
+            if tuplePosition[0]==config.nous:
+                return True
+    return False
+
+def getAdjacentPositions(targetPosition):
+    """
+    Entree: tuple de position
+    Sortie: liste de tuples des cases adjacentes
+    """
+    xmax=config.Xsize
+    ymax=config.Ysize
+    result=[]
+    if (targetPosition[0] not in [0,xmax-1]) and (targetPosition[1] not in [0,ymax-1]):
+        return []
+    elif targetPosition[0]==0:
+        pass
 
 def move(coord_start,number,coord_end):
     """
