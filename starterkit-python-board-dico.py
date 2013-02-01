@@ -33,6 +33,7 @@ send(sock, "NME", len(groupname), groupname)
 print data
 global home  #stock le tuple de coodonnees de notre maison. variable qui servira a identifier si on est des v ou des w
 global nous  #variable qui contiendra 'v' si on est des v ou 'w' si on est des w
+global eux  #variable qui contiendra 'w' si on est des v ou 'v' si on est des w
 global Xsize
 global Ysize
 
@@ -181,7 +182,9 @@ while True:
             else:
                 print "je n'ai pas compris l'ordre MAP"
         global nous
+        global eux
         nous = board[(home[0],home[1])] [0]  #enregistre 'v' ou 'w' dans la variable nous
+        eux = board[(home[0],home[1])] [1]  #enregistre 'v' ou 'w' dans la variable eux
         print "nous sommes de type: %s" %nous
         pprint(board)
         print "#################### fin du MAP ###################"
