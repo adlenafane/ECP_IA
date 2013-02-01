@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from random import choice
+
 
 # Coord1 et 2 sont des tuples ou des listes contenant x et y
 def computeMinDistance(coord_1, coord_2):
@@ -32,15 +34,17 @@ def findNextMove(coord_start, coord_goal):
 def getOurPositions(board, nous):
     """
     entree: board, nous
-    retourne: liste de tuples qui nous donne nos positions et notre nombre sur ces positions
+    retourne: liste de tuples qui nous donne nos positions et notre nombre sur ces positions, la liste est classée par "nombre sur ces positions"
     """
     ourPositions =[]
 
     for k in board: 
         if board[k][0] == nous: 
             ourPositions.append((k, board[k][1]))
+    
+    return sorted(ourPositions, key=lambda position: position[1]) 
 
-    return ourPositions
+
 
 def anyEnnemyClose():
     """
@@ -129,3 +133,18 @@ def next_coord(Xsize, Ysize, coord_start, direction):
             return (coord_start[0]-1, coord_start[1]+1)
         else:
             return coord_start
+
+def randomPossibleNextCoord(Xsize, Ysize, coord_start):
+    """
+    Renvoie les coordonnées possibles (= qui ne sort pas de la carte) pour un next move aléatoire. 
+    """
+    print "\nProcedure randomPossibleNextCoord"
+    coord=coord_start
+    print coord
+    while (coord==coord_start):
+            print "debut d'une boucle de while"
+            direction= choice(['u','ur','r','dr','d','dl','l','ul'])
+            print direction
+            coord = next_coord(Xsize, Ysize, coord_start, direction)
+            print coord
+    return coord

@@ -28,7 +28,7 @@ client = Client()
 sock = client.s
 
 #Envoi du nom
-groupname = "Stuxnet" #mettez ici le nom de votre equipe
+groupname = "Stuxnet-random-walk" #mettez ici le nom de votre equipe
 send(sock, "NME", len(groupname), groupname)
 print data
 global home  #stock le tuple de coodonnees de notre maison. variable qui servira a identifier si on est des v ou des w
@@ -121,36 +121,51 @@ while True:
         pprint(board)
 
         #calculez votre coup
-        
+        moves=[]
         ourPositions = getOurPositions(board, nous)
         #calculcoup(board,nous,nb_tours)
-        coord_start = ourPositions[0][0]
-        print coord_start
+        print "\nNombre de nos positions:"
+        print len(ourPositions)
+        if len(ourPositions)==3:
+            coord_start = ourPositions[0][0]
+            randomNextCoord=randomPossibleNextCoord(Xsize, Ysize, coord_start)
+            moves.extend([coord_start[0], coord_start[1], ourPositions[0][1],randomNextCoord[0],randomNextCoord[1]])
 
+            coord_start = ourPositions[1][0]
+            randomNextCoord=randomPossibleNextCoord(Xsize, Ysize, coord_start)
+            moves.extend([coord_start[0], coord_start[1], ourPositions[1][1],randomNextCoord[0],randomNextCoord[1]])
 
-        coord=coord_start
-        print coord
+            coord_start = ourPositions[2][0]
+            randomNextCoord=randomPossibleNextCoord(Xsize, Ysize, coord_start)
+            moves.extend([coord_start[0], coord_start[1], ourPositions[2][1],randomNextCoord[0],randomNextCoord[1]])
 
+        elif (len(ourPositions)<3):
+            print "\nBoucle elif position# <3"
+            for p in ourPositions:
+                if p[1]>1: #si on a plus de 1 créature sur la position p
+                    coord_start = p[0]
+                    randomNextCoord1=randomPossibleNextCoord(Xsize, Ysize, coord_start)
+                    randomNextCoord2=randomPossibleNextCoord(Xsize, Ysize, coord_start)
+                    moves.extend([coord_start[0], coord_start[1], p[1]/2,randomNextCoord1[0],randomNextCoord1[1]])
+                    moves.extend([coord_start[0], coord_start[1], p[1]-(p[1]/2),randomNextCoord2[0],randomNextCoord2[1]])
+                else:
+                    coord_start = p[0]
+                    randomNextCoord=randomPossibleNextCoord(Xsize, Ysize, coord_start)
+                    moves.extend([coord_start[0], coord_start[1], p[1],randomNextCoord[0],randomNextCoord[1]])
 
-        while (coord==coord_start):
-            print "debut d'une boucle de while"
-            direction= choice(['u','ur','r','dr','d','dl','l','ul'])
-            print direction
-            coord = next_coord(Xsize, Ysize, coord_start, direction)
-            print coord
-
-        print coord
 
         #preparez la trame MOV ou ATK
         #Par exemple: un ordre MOV qui fonctionne mais "ne respecte pas les regles" (je sais pas pk)
         #arg: "MOV" est suivi du nombre de quintuplets de deplacement n, puis des n quintuplets: (Xdepart, Ydepart, nb de pers a deplacer, X arrivee, Y arrivee)
-        print coord_start[0], coord_start[1], ourPositions[0][1],coord[0],coord[1]
+        print "\nNotre liste de move cotient combien de move ?"
+        print len(moves)/5
+        if len(moves)==5:
+            send(sock, "MOV", 1,moves[0], moves[1], moves[2],moves[3],moves[4])
+        elif len(moves)==10:
+            send(sock, "MOV", 2,moves[0], moves[1], moves[2],moves[3],moves[4],moves[5], moves[6], moves[7],moves[8],moves[9])
+        elif len(moves)>=15:
+            send(sock, "MOV", 3,moves[0], moves[1], moves[2],moves[3],moves[4],moves[5], moves[6], moves[7],moves[8],moves[9],moves[10], moves[11], moves[12],moves[13],moves[14])
 
-
-        send(sock, "MOV", 1,coord_start[0], coord_start[1], ourPositions[0][1],coord[0],coord[1])
-        """
-        send(sock, "MOV", 1,5,4,3,4,3)
-        """
         #un ex d'ordre ATK qui fonctionne:
         #send(sock, "ATK",4,4) #arg: "ATK" suivi des coordonnées de la cellule cible
         print "#################### fin du UPD ###################"
@@ -209,5 +224,3 @@ while True:
 
 #Fermeture de la socket
 sock.close()
-
-
