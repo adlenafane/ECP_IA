@@ -2,10 +2,19 @@
 
 # Coord1 et 2 sont des tuples ou des listes contenant x et y
 def computeMinDistance(coord_1, coord_2):
+    """
+    entrees: une coordonee de depart et une coordonee cible
+    retourne: La distance optimale entre ces 2 coordonees
+    NB: ne verifie pas la validite des coordonees
+    """
     return max(abs(coord_2[0] - coord_1[0]), abs(coord_2[1] - coord_1[1]))
 
 # Coord1 et 2 sont des tuples ou des listes contenant x et y
 def findNextMove(coord_start, coord_goal):
+    """
+    entrees: une coordonee de depart et une coordonee cible
+    retourne: la prochaine case sur laquelle aller
+    """
     if coord_start[0] == coord_goal[0] and coord_start[1] == coord_goal[1]:
         return (coord_start)
     elif coord_start[0] == coord_goal[0]:
@@ -33,6 +42,7 @@ def getOurPositions(board, nous):
     """
     entree: board, nous
     retourne: liste de tuples qui nous donne nos positions et notre nombre sur ces positions
+    NB: ne verifie pas la validite des coordonees
     """
     ourPositions =[]
 
