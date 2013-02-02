@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-import socket, struct
+import socket, struct, config
 from pprint import pprint
 from utility import *
 from random import choice
+
 
 
 data = []
@@ -31,11 +32,11 @@ sock = client.s
 groupname = "Stuxnet" #mettez ici le nom de votre equipe
 send(sock, "NME", len(groupname), groupname)
 print data
-global home  #stock le tuple de coodonnees de notre maison. variable qui servira a identifier si on est des v ou des w
-global nous  #variable qui contiendra 'v' si on est des v ou 'w' si on est des w
-global eux  #variable qui contiendra 'w' si on est des v ou 'v' si on est des w
-global Xsize
-global Ysize
+#config.home  #stock le tuple de coodonnees de notre maison. variable qui servira a identifier si on est des v ou des w
+#config.nous  #variable qui contiendra 'v' si on est des v ou 'w' si on est des w
+#config.eux  #variable qui contiendra 'w' si on est des v ou 'v' si on est des w
+#config.Xsize
+#config.Ysize
 
 print "#################### fin de l'initialisation de la connexion ###################"
 print "\n\n"
@@ -49,13 +50,10 @@ while True:
         print("Bizarre, c'est vide. Aucun ordre n'a du etre envoyé au serveur au tour precedant")
 
     if order == "SET":
-        global Xsize
-        global Ysize
         lignes, colonnes = (struct.unpack('=B', sock.recv(1))[0] for i in range(2))   #B est le format pour unsigned char donc sock.recv(1) permet de lire 1 entier. The result of struct.unpack(format, string) is a tuple even if it contains exactly one item. l'opération est faite 2 fois pour récupérer ligne et colonne.
         #ici faire ce qu'il faut pour preparer votre representation de la carte
-        board = {}
-        Xsize = lignes
-        Ysize = colonnes
+        config.Xsize = lignes
+        config.Ysize = colonnes
         #(type,n): case occupée par n personnages de type:
                                 #'h' pour les humains
                                 #'v' pour les vampires
@@ -73,9 +71,9 @@ while True:
         print maisons
         #maisons contient la liste des coordonnees des maisons ajoutez votre code ici
         for maison in maisons:
-            board[maison]=('h',0)
+            config.board[maison]=('h',0)
         print "Mise a jour du board: "
-        pprint(board)
+        pprint(config.board)
         print "\n\n"
         print "#################### fin du HUM ###################"
         print "\n\n"
@@ -85,10 +83,9 @@ while True:
     elif order == "HME":
         x, y = (struct.unpack('=B', sock.recv(1))[0] for i in range(2))
         #ajoutez le code ici (x,y) etant les coordonnees de votre maison
-        board[(x,y)]=('nous',0)
-        global home
-        home=(x,y)
-        print home
+        config.board[(x,y)]=('nous',0)
+        config.home=(x,y)
+        print config.home
         print "#################### fin du HME ###################"
         print "\n\n"
 
@@ -106,25 +103,27 @@ while True:
         #initialisez votre carte a partir des tuples contenus dans changes
         for change in changes:
             if change[2]!=0:
-                board[(change[0],change[1])]=('h', change[2])
+                config.board[(change[0],change[1])]=('h', change[2])
             elif change[3]!=0:
-                board[(change[0],change[1])]=('v', change[3])
+                config.board[(change[0],change[1])]=('v', change[3])
             elif change[4]!=0:
-                board[(change[0],change[1])]=('w', change[4])
+                config.board[(change[0],change[1])]=('w', change[4])
             elif (change[2]==0 and change[3]==0 and change[4]==0):
                 k = (change[0],change[1])
                 try:
-                    del board[k]
+                    del config.board[k]
                 except:
                     print "UPD a transmis une case vide qui etait deja vide"
             else:
                 print "je n'ai pas compris l'ordre UPD"
-        pprint(board)
+        pprint(config.board)
 
         #calculez votre coup
         
-        ourPositions = getOurPositions(board, nous)
-        #calculcoup(board,nous,nb_tours)
+        ourPositions = getOurPositions()
+        theirPositions = getEnnemyPositions()
+        print "getEnnemyPositions", theirPositions
+        #calculcoup(config.board,config.nous,nb_tours)
         coord_start = ourPositions[0][0]
         print coord_start
 
@@ -137,7 +136,7 @@ while True:
             print "debut d'une boucle de while"
             direction= choice(['u','ur','r','dr','d','dl','l','ul'])
             print direction
-            coord = next_coord(Xsize, Ysize, coord_start, direction)
+            coord = next_coord(config.Xsize, config.Ysize, coord_start, direction)
             print coord
 
         print coord
@@ -168,25 +167,30 @@ while True:
         #initialisez votre carte a partir des tuples contenus dans changes
         for change in changes:
             if change[2]!=0:
-                board[(change[0],change[1])]=('h', change[2])
+                config.board[(change[0],change[1])]=('h', change[2])
             elif change[3]!=0:
-                board[(change[0],change[1])]=('v', change[3])
+                config.board[(change[0],change[1])]=('v', change[3])
             elif change[4]!=0:
-                board[(change[0],change[1])]=('w', change[4])
+                config.board[(change[0],change[1])]=('w', change[4])
             elif (change[2]==0 and change[3]==0 and change[4]==0):
                 k = (change[0],change[1])
                 try:
-                    del board[k]
+                    del config.board[k]
                 except:
                     print "UPD a transmis une case vide qui etait deja vide"
             else:
                 print "je n'ai pas compris l'ordre MAP"
-        global nous
-        global eux
-        nous = board[(home[0],home[1])] [0]  #enregistre 'v' ou 'w' dans la variable nous
-        eux = board[(home[0],home[1])] [1]  #enregistre 'v' ou 'w' dans la variable eux
-        print "nous sommes de type: %s" %nous
-        pprint(board)
+        config.nous = config.board[(config.home[0],config.home[1])] [0]  #enregistre 'v' ou 'w' dans la variable nous
+        if config.nous == 'v':
+            config.eux = 'w'  #enregistre 'v' ou 'w' dans la variable eux
+        else:
+            config.eux = 'v'
+        print "nous sommes de type: %s" %config.nous
+        ourPositions = getOurPositions()
+        theirPositions = getEnnemyPositions()
+        print "anyEnnemyClose", anyEnnemyClose()
+        print "anyHumanClose", anyHumanClose()
+        pprint(config.board)
         print "#################### fin du MAP ###################"
         print "\n\n"
 

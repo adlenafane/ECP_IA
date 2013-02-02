@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import config
 
 # Coord1 et 2 sont des tuples ou des listes contenant x et y
 def computeMinDistance(coord_1, coord_2):
@@ -38,7 +39,7 @@ def findNextMove(coord_start, coord_goal):
         else:
             return (coord_start[0]-1, coord_start[1]-1)
 
-def getOurPositions(board, nous):
+def getOurPositions():
     """
     entree: board, nous
     retourne: liste de tuples qui nous donne nos positions et notre nombre sur ces positions
@@ -46,23 +47,65 @@ def getOurPositions(board, nous):
     """
     ourPositions =[]
 
-    for k in board: 
-        if board[k][0] == nous: 
-            ourPositions.append((k, board[k][1]))
+    for k in config.board: 
+        if config.board[k][0] == config.nous: 
+            ourPositions.append((k, config.board[k][1]))
 
     return ourPositions
+
+def getEnnemyPositions():
+    """
+    entree: board, 
+    retourne: liste de tuples qui nous donne la position des ennemis et leur nombre sur ces positions
+    NB: ne verifie pas la validite des coordonees
+    """
+    ennemyPositions = []
+    for k in config.board:
+        if config.board[k][0] == config.eux:
+            ennemyPositions.append((k, config.board[k][1]))
+    return ennemyPositions
+
+def getHumanPositions():
+    """
+    entree: board
+    retourne: liste de tuples qui nous donne la position des humains et leur nombre sur ces positions
+    NB: ne verifie pas la validite des coordonees
+    """
+    humanPositions = []
+
+    for k in config.board:
+        if config.board[k][0] == 'h':
+            humanPositions.append((k, config.board[k][1]))
+    return humanPositions
 
 def anyEnnemyClose():
     """
     entree: board
     retourne: un dico avec en clé: tuple de positions des ennemis qui snt adjacents à une de nos positions, et en valeur un tuple (tuples de nos positions mmenacées, nombre de nos creatures présentes sur cette case)
     """
+    ourPositions = getOurPositions()
+    ennemyPositions = getEnnemyPositions()
+    allDistances = []
+    for ourPosition in ourPositions:
+        for ennemyPosition in ennemyPositions:
+            distance = computeMinDistance(ourPosition[0], ennemyPosition[0])
+            allDistances.append((ourPosition, ennemyPosition, distance))
+    return sorted(allDistances, key=lambda distance: distance[2])
 
 def anyHumanClose():
     """
     entree: board
     retourne: un dico avec en clé: tuple de positions des humains qui snt adjacents à une de nos positions, et en valeur un tuple (tuples de nos positions mmenacées, nombre de nos creatures présentes sur cette case)
     """
+    ourPositions = getOurPositions()
+    humanPositions = getHumanPositions()
+    allDistances = []
+    for ourPosition in ourPositions:
+        for humanPosition in humanPositions:
+            distance = computeMinDistance(ourPosition[0], humanPosition[0])
+            allDistances.append((ourPosition, humanPosition, distance))
+    return sorted(allDistances, key=lambda distance: distance[2])
+
 
 def attack():
     """
