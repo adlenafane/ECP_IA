@@ -46,17 +46,61 @@ def getOurPositions(board, nous):
 
 
 
+def getHumanNumber(board): #to be checked
+    """
+    entree: board
+    retourne le nombre d'humains restants sur le plateau
+    """
+    #rappel: board[(x,y)]=(type, nombre)
+    return sum([v[1] for k,v in board.items() if v[0]=='h'])
+
+
+def getOurNumber(board,nous): #to be checked
+    """
+    entree: board
+    retourne le nombre d'humains restants sur le plateau
+    """
+    #rappel: board[(x,y)]=(type, nombre)
+    return sum([v[1] for k,v in board.items() if v[0]==nous])
+
+
+def getEnnemyNumber(board, nous): #to be checked
+    """
+    entree: board, nous
+    nous='v' ou 'w' 
+    retourne le nombre d'ennemis restants sur le plateau
+    """
+    if nous == 'v':
+        ennemy_type='w'
+    else:
+        ennemy_type='v'
+    return sum([v[1] for k,v in board.items() if v[0]==ennemy_type])
+
+def get_heuristic_score(board, nous):
+    """
+    entree: board, nous
+    nous='v' ou 'w' 
+    retourne un entier représentant le score heuristique du board
+    Plus le score est élevé, plus le board nous est favorable
+    Valeurs des coefficients à tester
+    """
+    return 3*getOurNumber(board,nous) - 2*getEnnemyNumber(board, nous) - getHumanNumber(board)
+
+
+
 def anyEnnemyClose():
     """
     entree: board
     retourne: un dico avec en clé: tuple de positions des ennemis qui snt adjacents à une de nos positions, et en valeur un tuple (tuples de nos positions mmenacées, nombre de nos creatures présentes sur cette case)
     """
 
+
 def anyHumanClose():
     """
     entree: board
     retourne: un dico avec en clé: tuple de positions des humains qui snt adjacents à une de nos positions, et en valeur un tuple (tuples de nos positions mmenacées, nombre de nos creatures présentes sur cette case)
     """
+
 
 def attack(targetPosition):
     """
