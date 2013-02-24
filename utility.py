@@ -79,6 +79,46 @@ def getHumanPositions():
             humanPositions.append((k, config.board[k][1]))
     return humanPositions
 
+def getHumanNumber(): #to be checked
+    """
+    entree: board
+    retourne le nombre d'humains restants sur le plateau
+    """
+    #rappel: board[(x,y)]=(type, nombre)
+    return sum([v[1] for k,v in config.board.items() if v[0]=='h'])
+
+
+def getOurNumber(): #to be checked
+    """
+    entree: board
+    retourne le nombre d'humains restants sur le plateau
+    """
+    #rappel: board[(x,y)]=(type, nombre)
+    return sum([v[1] for k,v in config.board.items() if v[0]==config.nous])
+
+
+def getEnnemyNumber(): #to be checked
+    """
+    entree: board, nous
+    nous='v' ou 'w' 
+    retourne le nombre d'ennemis restants sur le plateau
+    """
+    if config.nous == 'v':
+        ennemy_type='w'
+    else:
+        ennemy_type='v'
+    return sum([v[1] for k,v in config.board.items() if v[0]==ennemy_type])
+
+def get_heuristic_score():
+    """
+    entree: board, nous
+    nous='v' ou 'w' 
+    retourne un entier représentant le score heuristique du board
+    Plus le score est élevé, plus le board nous est favorable
+    Valeurs des coefficients à tester
+    """
+    return 3*getOurNumber(config.board, config.nous) - 2*getEnnemyNumber(config.board, config.nous) - getHumanNumber(config.board)
+
 def anyEnnemyClose():
     """
     entree: board
