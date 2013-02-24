@@ -5,7 +5,6 @@ from utility import *
 from random import choice
 
 
-
 data = []
 nb_tours = 0
 def send(sock, *messages):

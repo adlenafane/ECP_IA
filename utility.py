@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import config
+from random import choice
 
 # Coord1 et 2 sont des tuples ou des listes contenant x et y
 def computeMinDistance(coord_1, coord_2):
@@ -107,12 +108,42 @@ def anyHumanClose():
     return sorted(allDistances, key=lambda distance: distance[2])
 
 
-def attack():
+def attack(targetPosition):
     """
-    entree: tuple de coordonnes de la cellule a attaquer
+    entree: tuple de coordonnes de la cellule a attaquer et board
     nb: faire un test si la cellule cible est bien une cellule a notre portee
     retourne: le send correctement formaté
     """
+    adjacentsList=getAdjacentPositions(targetPosition)
+    if checkPresence(adjacentsList,config.board)==False:
+        return "Cellule hors de portee"
+    else:
+        #Lancer ordre attaque
+        return send(sock,"ATK",targetPosition[0],targetPosition[1])
+
+def checkPresence(adjacentsList):
+    """
+    Entree: liste de tuples de positions
+    Sortie: True ou False selon presence de nous dans au moins une de ces cases
+    """
+    for tuplePosition in adjacentsList:
+        if tuplePosition in config.board:
+            if tuplePosition[0]==config.nous:
+                return True
+    return False
+
+def getAdjacentPositions(targetPosition):
+    """
+    Entree: tuple de position
+    Sortie: liste de tuples des cases adjacentes
+    """
+    xmax=config.Xsize
+    ymax=config.Ysize
+    result=[]
+    if (targetPosition[0] not in [0,xmax-1]) and (targetPosition[1] not in [0,ymax-1]):
+        return []
+    elif targetPosition[0]==0:
+        pass
 
 def move(coord_start,number,coord_end):
     """
@@ -129,6 +160,9 @@ def next_coord(Xsize, Ysize, coord_start, direction):
     si le mouvement dans cette diection est possible, retourne ls cordonnes suivantes apres le mouvement
     sinon retourne False
     """
+    Xsize = config.Xsize
+    Ysize = config.Ysize
+
     if direction == 'u':
         print "direction u"
         if coord_start[1]+1<=Ysize-1:
@@ -182,3 +216,19 @@ def next_coord(Xsize, Ysize, coord_start, direction):
             return (coord_start[0]-1, coord_start[1]+1)
         else:
             return coord_start
+
+
+def randomPossibleNextCoord(Xsize, Ysize, coord_start):
+    """
+    Renvoie les coordonnées possibles (= qui ne sort pas de la carte) pour un next move aléatoire. 
+    """
+    print "\nProcedure randomPossibleNextCoord"
+    coord=coord_start
+    print coord
+    while (coord==coord_start):
+            print "debut d'une boucle de while"
+            direction= choice(['u','ur','r','dr','d','dl','l','ul'])
+            print direction
+            coord = next_coord(config.Xsize, config.Ysize, coord_start, direction)
+            print coord
+    return coord
