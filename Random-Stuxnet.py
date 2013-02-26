@@ -28,14 +28,14 @@ client = Client()
 sock = client.s
 
 #Envoi du nom
-groupname = "Stuxnet" #mettez ici le nom de votre equipe
+groupname = "Random-Stuxnet" #mettez ici le nom de votre equipe
 send(sock, "NME", len(groupname), groupname)
 print data
 #config.home  #stock le tuple de coodonnees de notre maison. variable qui servira a identifier si on est des v ou des w
 #config.nous  #variable qui contiendra 'v' si on est des v ou 'w' si on est des w
 #config.eux  #variable qui contiendra 'w' si on est des v ou 'v' si on est des w
-#config.Xsize
-#config.Ysize
+
+
 
 print "#################### fin de l'initialisation de la connexion ###################"
 print "\n\n"
@@ -53,7 +53,7 @@ while True:
         #ici faire ce qu'il faut pour preparer votre representation de la carte
         config.Xsize = lignes
         config.Ysize = colonnes
-        #(type,n): case occupée par n personnages de type:
+        #{(x,y):(type,n)}: case occupée par n personnages de type:
                                 #'h' pour les humains
                                 #'v' pour les vampires
                                 #'w' pour les loups garous
@@ -115,6 +115,7 @@ while True:
                     print "UPD a transmis une case vide qui etait deja vide"
             else:
                 print "je n'ai pas compris l'ordre UPD"
+
         pprint(config.board)
 
         #calculez votre coup
@@ -135,7 +136,8 @@ while True:
             print "debut d'une boucle de while"
             direction= choice(['u','ur','r','dr','d','dl','l','ul'])
             print direction
-            coord = next_coord(config.Xsize, config.Ysize, coord_start, direction)
+            coord = next_coord(coord_start, direction)
+
             print coord
 
         print coord
@@ -175,6 +177,7 @@ while True:
                 k = (change[0],change[1])
                 try:
                     del config.board[k]
+
                 except:
                     print "UPD a transmis une case vide qui etait deja vide"
             else:
@@ -215,3 +218,4 @@ while True:
 
 #Fermeture de la socket
 sock.close()
+
