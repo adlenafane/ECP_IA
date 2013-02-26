@@ -272,7 +272,7 @@ def sum_min_distance_us_human_delta(any_board):
         local_dist= +inf
         local_coef=0 #will be set to +1 if humans outnumber us
         for human_position in human_positions:
-            if computeMinDistance(our_position[0],human_position[0]) < local_dist
+            if computeMinDistance(our_position[0],human_position[0]) < local_dist:
                 local_dist = computeMinDistance(our_position[0],human_position[0])
                 if our_position[1]<human_position[1]:
                     local_coef = 1
@@ -291,7 +291,7 @@ def sum_min_distance_us_ennemy_delta(any_board):
         local_dist= +inf
         local_coef=0 #will be set to -1 if ennemies outnumber us
         for ennemy_position in ennemy_positions:
-            if computeMinDistance(our_position[0],ennemy_position[0]) < local_dist
+            if computeMinDistance(our_position[0],ennemy_position[0]) < local_dist:
                 local_dist = computeMinDistance(our_position[0],ennemy_position[0])
                 if our_position[1]<ennemy_position[1]:
                     local_coef = -1
@@ -310,7 +310,7 @@ def sum_min_distance_ennemy_human_delta(any_board):
         local_dist= +inf
         local_coef=0 #will be set to +1 if humans outnumber ennemies
         for human_position in human_positions:
-            if computeMinDistance(ennemy_position[0],human_position[0]) < local_dist
+            if computeMinDistance(ennemy_position[0],human_position[0]) < local_dist:
                 local_dist = computeMinDistance(ennemy_position[0],human_position[0])
                 if ennemy_position[1]<human_position[1]:
                     local_coef = 1
@@ -336,7 +336,7 @@ def go_attack_humans(any_board, position):
     human_positions = get_human_positions(any_board) #[((x,y),number)]
     dist= +inf
     for human_position in human_positions:
-        if computeMinDistance(human_positions[0],position) < dist
+        if computeMinDistance(human_positions[0],position) < dist:
                 dist = computeMinDistance(human_positions[0],position)
                 coord_goal = human_positions[0]
                 number_goal = human_positions[1]
