@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import socket, struct
 from pprint import pprint
-from utility import *
+import config
+from utility import next_coord
 from random import choice
 
 
