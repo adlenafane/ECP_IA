@@ -397,7 +397,7 @@ class Board():
 
 def main():
     """
-    to run the tests
+    for testing purposes only
     this part is executed only when the file is executed in command line 
     (ie not executed when imported in another file)
     """
@@ -428,5 +428,7 @@ def main():
     print '-'*50
     print "le score heuristique du board est: "+str(board.score())
 
+
+#for testing purposes only
 if __name__=="__main__":
     main()
