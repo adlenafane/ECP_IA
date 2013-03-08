@@ -329,18 +329,17 @@ def heuristic_delta(ennemy_number_delta, our_number_delta,human_number_delta, su
 
 
 
-def go_attack_humans(any_board, position):
+def compute_human_targets(any_board):
     """
     
     """
     human_positions = get_human_positions(any_board) #[((x,y),number)]
-    dist= +inf
+    our_positions = getOurPositions(any_board)
+    human_targets=[] #de la forme [((x,y),nombre,distance min à notre position, notre nombre sur cette position]
     for human_position in human_positions:
-        if computeMinDistance(human_positions[0],position) < dist:
-                dist = computeMinDistance(human_positions[0],position)
-                coord_goal = human_positions[0]
-                number_goal = human_positions[1]
-    next_coord = findNextMove(position, coord_goal)
+        for our_position in our_positions:
+            human_targets.append((human_position[0],human_position[1],computeMinDistance(human_positions[0],our_position[0]),our_position[1]))
+
     
 
 
