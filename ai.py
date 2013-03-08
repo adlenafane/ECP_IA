@@ -1,122 +1,107 @@
-from utility import getOurPositions, getEnnemyPositions, getHumanPositions, findNextMove
-import config
+from utility import Board, VectorPosition
+import copy
 
 class Stuxnet():
 	""" Class to handle our AI"""
 	def __init__(self, arg):
-		self.missionList = ['attack']
-		self.gameGraph = []
-		self.stackToEvaluate = []
+		self.mission_list = ['attack']
+		self.game_graph = []
+		self.stack_to_evaluate = []
 
-	def updateGameGraph(self, board):
+	def update_game_graph(self, board):
 		'''
 			Generate the new game graph.
-			For now it replaces the current gameGraph with the given board
+			For now it replaces the current game_graph with the given board
 			TODO:
 			- Remind the past
 			- Cut only the wrong branches
 		'''
-		self.gameGraph = [board]
+		self.game_graph = [board]
 	
-	def findSmartMove(self):
+	def find_smart_move(self):
 		'''
 			Called once in the main loop and return the smartest order we could find
 			Implementation of the min/max or alpha/beta :)
-			For now we make only one round (just findBestMoves actually)
+			For now we make only one round (just find_best_moves actually)
 		'''
 		# Add current element to the stack
-		self.stackToEvaluate = self.gameGraph[0]
-		while self.stackToEvaluate != []:
+		self.stack_to_evaluate = self.game_graph[0]
+		while self.stack_to_evaluate != []:
 			# Get the next element to evaluate
 			# For the future we will probably have to implement a .pop() or similar
-			currentBoard = self.stackToEvaluate[0]
+			current_board = self.stack_to_evaluate[0]
 
 			'''For testing purpose, we have to "pop" the element IRL '''
-			self.stackToEvaluate = []
+			self.stack_to_evaluate = []
 			# From the possibility (a board) compute the next smart possible moves
-			bestMoves = self.findBestMoves(currentBoard)
+			best_moves = self.find_best_moves(current_board)
 
-			''' IRL we have to add the next elements to evaluate in the stackToEvaluate '''
-		nextOrder = self.selectBestMove(bestMoves)
-		return nextOrder
+			''' IRL we have to add the next elements to evaluate in the stack_to_evaluate '''
+		next_order = self.select_best_move(best_moves)
+		return next_order
 
-	def findBestMoves(self, currentBoard):
+	def find_best_moves(self, current_board):
 		'''
 			From a given board, evaluate all the missions in mission list
 			And for all the mission, generate all the outputs for this mission and make a first clean
 		'''
-		ourPositions = getOurPositions(currentBoard)
-		ennemyPositions = getEnnemyPositions(currentBoard)
-		humanPositions = getHumanPositions(currentBoard)
 		# Concatene all positions (we may want to attack ennemies and humans and we may want to join our friends)
-		allPositions = []
-		# Let's add a tag to remember if the element is our, ennemy or human because we don't want to attack our friend
-		for ourPosition in ourPositions:
-			allPositions.append((config.nous).extend(ourPosition))
-		for ennemyPosition in ennemyPositions:
-			allPositions.append((config.eux).extend(ennemyPosition))
-		for humanPosition in humanPositions:
-			allPositions.append(('h').extend(humanPosition))
+		all_positions = current_board.our_positions() + current_board.ennemy_positions() + current_board.human_positions()
 
 		# Receiver for all the alternatives we may find
 		alternatives = []
 
 		# Let's go throught all possibilites !
-		for ourPosition in ourPositions:
-			for otherPosition in allPositions:
+		for our_position in current_board.our_position():
+			for other_position in all_positions:
 				# Let's consider the distincts cases
-				if otherPosition != ourPosition:
-					for mission in self.missionList:
-						# We should not try not attack ourPositions
-						if self.isMissionCompliant(otherPosition[0], mission):
-							targetBoard, nextOrder = self.computeMissionResult(currentBoard, mission, ourPosition, otherPosition)
-							missionScore = self.computeMissionScore(mission, currentBoard, targetBoard)
-							alternatives.append((targetBoard, nextOrder, missionScore))
+				if other_position != our_position:
+					for mission in self.mission_list:
+						# We should not try not attack our_positions
+						if self.is_mission_compliant(other_position.kind(), mission):
+							target_board, next_order = self.compute_mission_result(current_board, mission, our_position, other_position)
+							missionScore = self.computeMissionScore(mission, current_board, target_board)
+							alternatives.append((target_board, next_order, missionScore))
 		# Sort the list based on the score
 		# moves = alternatives.sort()
 
 		moves = []
 
-		bestMoves = self.cleanMoves(moves)
-		return bestMoves
+		best_moves = self.cleanMoves(moves)
+		return best_moves
 
-	def isMissionCompliant(self, otherPositionType, mission):
+	def is_mission_compliant(self, other_position_kind, mission):
 		'''
-			From the type of the other position evaluate if the mission makes sense
+			From the kind of the other position evaluate if the mission makes sense
 			For instance 'e', attack will return True but 'o', attack will return False
 		'''
 		return True
 
-	def computeMissionResult(self, currentBoard, mission, ourPosition, otherPosition):
+	def compute_mission_result(self, current_board, mission, our_position, other_position):
 		'''
 			From the current board, the mission and the 2 considered elements compute the targeted board and the next order
 		'''
-		newBoard = currentBoard
-		nextOrder = []
-		ourCoordinnates = ourPosition[0]
-		ourNumber = ourPosition[1]
-		theirType = otherPosition[0]
-		theirCoordinnates = otherPosition[1]
-		theirNumber = otherPosition[2]
+		new_board = copy.deepcopy(current_board)
+		next_order = []
 
 		if mission == 'attack':
-			# Remove our position from the board, format of ourPosition ('coordonees', 'nombre')
-			del newBoard[ourCoordinnates]
-			# Remove their position from the board, format of otherPosition ('type', 'coordonees', 'nombre')
-			del newBoard[theirCoordinnates]
+			# Remove our position from the board, format of our_position ('coordonees', 'nombre')
+			del new_board.grid[our_position.coord()]
+			# Remove their position from the board, format of other_position ('kind', 'coordonees', 'nombre')
+			del new_board.grid[other_position.coord()]
 			# Add our team on the ennemy position
-			if theirType == 'h':
-				newBoard[theirCoordinnates] = ('n', ourNumber + )
+			if other_position.kind() == 'h':
+				new_board.grid[other_position.coord()] = (our_position.kind(), our_position.number() + other_position.number())
 			else:
-				newBoard[otherPosition[1]] = ('n', ourPosition[1])
-			nextCoord = findNextMove(ourPosition[0], otherPosition[1])
-			nextOrder = ['MOV', otherPosition]
+				new_board.grid[other_position.coord()] = (our_position.kind(), our_position.number())
+			nextCoord = findNextMove(our_position.coord(), other_position.coord())
+			next_order = ['MOV', 1, our_position.coord()[0], our_position.coord()[1], our_position.number(), nextCoord[0], nextCoord[1]]
 		else:
 			pass
 		
-		return newBoard, nextOrder
+		return new_board, next_order
 
-	def computeMissionScore(self, mission, currentBoard, targetBoard):
+	def computeMissionScore(self, mission, current_board, target_board):
 		'''
 			Compute the score of a given mission, based on the heuristic function 
 		'''
@@ -126,12 +111,12 @@ class Stuxnet():
 		'''
 			From a list of moves, keeps only the best ones (TOP 5 or only those with a given score...)
 		'''
-		bestMoves = []
-		return bestMoves
+		best_moves = []
+		return best_moves
 
-	def selectBestMove(self, bestMoves):
+	def select_best_move(self, best_moves):
 		'''
 			Once we have computed all the possible move, select the best one
 		'''
-		nextOrder = []
-		return nextOrder
+		next_order = []
+		return next_order
