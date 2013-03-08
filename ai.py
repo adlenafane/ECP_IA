@@ -1,9 +1,10 @@
-from utility import getOurPositions, getEnnemyPositions, getHumanPositions
+from utility import getOurPositions, getEnnemyPositions, getHumanPositions, findNextMove
+import config
 
 class Stuxnet():
 	""" Class to handle our AI"""
 	def __init__(self, arg):
-		self.missionList = []
+		self.missionList = ['attack']
 		self.gameGraph = []
 		self.stackToEvaluate = []
 
@@ -20,6 +21,8 @@ class Stuxnet():
 	def findSmartMove(self):
 		'''
 			Called once in the main loop and return the smartest order we could find
+			Implementation of the min/max or alpha/beta :)
+			For now we make only one round (just findBestMoves actually)
 		'''
 		# Add current element to the stack
 		self.stackToEvaluate = self.gameGraph[0]
@@ -45,21 +48,31 @@ class Stuxnet():
 		ourPositions = getOurPositions(currentBoard)
 		ennemyPositions = getEnnemyPositions(currentBoard)
 		humanPositions = getHumanPositions(currentBoard)
-		# Concatene all positions (we may want to attack ennemies and humans and we may want to rally our friends)
-		allPositions = ourPositions + ennemyPositions + humanPositions
+		# Concatene all positions (we may want to attack ennemies and humans and we may want to join our friends)
+		allPositions = []
+		# Let's add a tag to remember if the element is our, ennemy or human because we don't want to attack our friend
+		for ourPosition in ourPositions:
+			allPositions.append((config.nous).extend(ourPosition))
+		for ennemyPosition in ennemyPositions:
+			allPositions.append((config.eux).extend(ennemyPosition))
+		for humanPosition in humanPositions:
+			allPositions.append(('h').extend(humanPosition))
 
 		# Receiver for all the alternatives we may find
 		alternatives = []
+
+		# Let's go throught all possibilites !
 		for ourPosition in ourPositions:
 			for otherPosition in allPositions:
 				# Let's consider the distincts cases
 				if otherPosition != ourPosition:
 					for mission in self.missionList:
-						# if mission complies with case : #We should not try not attack ourPositions
-						targetBoard, nextOrder = self.computeMissionResult(currentBoard, mission, ourPosition, otherPosition)
-						missionScore = self.computeMissionScore(mission, currentBoard, targetBoard)
-						alternatives.append((targetBoard, nextOrder, missionScore))
-		# Sort eh list based on the score
+						# We should not try not attack ourPositions
+						if self.isMissionCompliant(otherPosition[0], mission):
+							targetBoard, nextOrder = self.computeMissionResult(currentBoard, mission, ourPosition, otherPosition)
+							missionScore = self.computeMissionScore(mission, currentBoard, targetBoard)
+							alternatives.append((targetBoard, nextOrder, missionScore))
+		# Sort the list based on the score
 		# moves = alternatives.sort()
 
 		moves = []
@@ -67,15 +80,43 @@ class Stuxnet():
 		bestMoves = self.cleanMoves(moves)
 		return bestMoves
 
-	def computeMissionResult(currentBoard, mission, ourPosition, otherPosition):
+	def isMissionCompliant(self, otherPositionType, mission):
+		'''
+			From the type of the other position evaluate if the mission makes sense
+			For instance 'e', attack will return True but 'o', attack will return False
+		'''
+		return True
+
+	def computeMissionResult(self, currentBoard, mission, ourPosition, otherPosition):
 		'''
 			From the current board, the mission and the 2 considered elements compute the targeted board and the next order
 		'''
-		newBoard = {}
+		newBoard = currentBoard
 		nextOrder = []
+		ourCoordinnates = ourPosition[0]
+		ourNumber = ourPosition[1]
+		theirType = otherPosition[0]
+		theirCoordinnates = otherPosition[1]
+		theirNumber = otherPosition[2]
+
+		if mission == 'attack':
+			# Remove our position from the board, format of ourPosition ('coordonees', 'nombre')
+			del newBoard[ourCoordinnates]
+			# Remove their position from the board, format of otherPosition ('type', 'coordonees', 'nombre')
+			del newBoard[theirCoordinnates]
+			# Add our team on the ennemy position
+			if theirType == 'h':
+				newBoard[theirCoordinnates] = ('n', ourNumber + )
+			else:
+				newBoard[otherPosition[1]] = ('n', ourPosition[1])
+			nextCoord = findNextMove(ourPosition[0], otherPosition[1])
+			nextOrder = ['MOV', otherPosition]
+		else:
+			pass
+		
 		return newBoard, nextOrder
 
-	def computecomputeMissionScore(self, mission, currentBoard, targetBoard):
+	def computeMissionScore(self, mission, currentBoard, targetBoard):
 		'''
 			Compute the score of a given mission, based on the heuristic function 
 		'''
