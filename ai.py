@@ -1,14 +1,16 @@
-from utility import findNextMove
+from utility import findNextMove, Board
+import config
 import copy
 import random
+import pprint
 from operator import itemgetter
 
 class Stuxnet():
 	""" Class to handle our AI"""
-	def __init__(self, arg):
-		self.mission_list = ['attack']
-		self.game_graph = []
-		self.stack_to_evaluate = []
+	def __init__(self, mission_list = ['attack'], game_graph = [], stack_to_evaluate = []):
+		self.mission_list = mission_list
+		self.game_graph =  game_graph
+		self.stack_to_evaluate = stack_to_evaluate
 
 	def update_game_graph(self, board):
 		'''
@@ -27,7 +29,7 @@ class Stuxnet():
 			For now we make only one round (just find_best_moves actually)
 		'''
 		# Add current element to the stack
-		self.stack_to_evaluate = self.game_graph[0]
+		self.stack_to_evaluate.append(self.game_graph[0])
 		while self.stack_to_evaluate != []:
 			# Get the next element to evaluate
 			# For the future we will probably have to implement a .pop() or similar
@@ -39,6 +41,9 @@ class Stuxnet():
 			best_order = self.find_best_moves(current_board)
 
 			''' IRL we have to add the next elements to evaluate in the stack_to_evaluate '''
+		pprint.pprint(best_order)
+		best_order = sorted(best_order, key=itemgetter(2), reverse=True)
+		pprint.pprint(best_order)
 		next_order = self.select_best_move(best_order)
 		return next_order
 
@@ -47,25 +52,39 @@ class Stuxnet():
 			From a given board, evaluate all the missions in mission list
 			And for all the mission, generate all the outputs for this mission and make a first clean
 		'''
-		# Concatene all positions (we may want to attack ennemies and humans and we may want to join our friends)
-		all_positions = current_board.our_positions() + current_board.ennemy_positions() + current_board.human_positions()
-
 		# Receiver for all the alternatives we may find
 		alternatives = []
 
 		# Let's go throught all possibilites !
-		for our_position in current_board.our_position():
-			for other_position in all_positions:
+		for our_position in current_board.our_positions():
+			for other_position in current_board.our_positions():
+				# Let's consider the distincts cases
+				if other_position.coord != our_position.coord:
+					for mission in self.mission_list:
+						# We should not try not attack our_positions
+						if self.is_mission_compliant(other_position.kind, mission):
+							target_board, next_order = self.compute_mission_result(current_board, mission, our_position, other_position)
+							alternatives.append((target_board, next_order, target_board.score()))
+
+			for other_position in current_board.ennemy_positions():
 				# Let's consider the distincts cases
 				if other_position != our_position:
 					for mission in self.mission_list:
 						# We should not try not attack our_positions
-						if self.is_mission_compliant(other_position.kind(), mission):
+						if self.is_mission_compliant(other_position.kind, mission):
 							target_board, next_order = self.compute_mission_result(current_board, mission, our_position, other_position)
-							missionScore = self.compute_missioN_score(mission, current_board, target_board)
-							alternatives.append((target_board, next_order, missionScore))
+							alternatives.append((target_board, next_order, target_board.score()))
+
+			for other_position in current_board.human_positions():
+				# Let's consider the distincts cases
+				if other_position != our_position:
+					for mission in self.mission_list:
+						# We should not try not attack our_positions
+						if self.is_mission_compliant(other_position.kind, mission):
+							target_board, next_order = self.compute_mission_result(current_board, mission, our_position, other_position)
+							alternatives.append((target_board, next_order, target_board.score()))
 		# Sort the list based on the score
-		sorted(alternatives, key=itemgetter(2), reverse=True)
+		alternatives = sorted(alternatives, key=itemgetter(2), reverse=True)
 		order = self.generate_move(alternatives)
 		return order
 
@@ -85,35 +104,50 @@ class Stuxnet():
 
 		if mission == 'attack':
 			# Remove our position from the board, format of our_position ('coordonees', 'nombre')
-			del new_board.grid[our_position.coord()]
+			del new_board.grid[our_position.coord]
+
 			# Remove their position from the board, format of other_position ('kind', 'coordonees', 'nombre')
-			del new_board.grid[other_position.coord()]
+			del new_board.grid[other_position.coord]
+
 			# Add our team on the ennemy position
-			if other_position.kind() == 'h':
-				new_board.grid[other_position.coord()] = (our_position.kind(), our_position.number() + other_position.number())
+			if other_position.kind == 'h':
+				new_board.grid[other_position.coord] = (our_position.kind, our_position.number + other_position.number)
 			else:
-				new_board.grid[other_position.coord()] = (our_position.kind(), our_position.number())
-			nextCoord = findNextMove(our_position.coord(), other_position.coord())
-			next_order = ['MOV', 1, our_position.coord()[0], our_position.coord()[1], our_position.number(), nextCoord[0], nextCoord[1]]
+				new_board.grid[other_position.coord] = (our_position.kind, our_position.number)
+			nextCoord = findNextMove(our_position.coord, other_position.coord)
+			next_order = ['MOV', 1, our_position.coord[0], our_position.coord[1], our_position.number, nextCoord[0], nextCoord[1]]
 		else:
 			pass
 		
 		return new_board, next_order
 
-	def compute_missioN_score(self, mission, current_board, target_board):
-		'''
-			Compute the score of a given mission, based on the heuristic function 
-		'''
-		return random.randint(1, 10)
-
 	def select_best_move(self, best_order):
 		'''
 			Once we have computed all the possible move, select the best one
 		'''
-		return best_order
+		return best_order[0]
 
 	def generate_move(self, alternatives):
 		'''
 			From a list of alternatives (e.g. possible orders), find the best compliant one
 		'''
 		return alternatives
+
+def main():
+	"""
+    to run the tests
+    this part is executed only when the file is executed in command line 
+    (ie not executed when imported in another file)
+    """
+	grid = {(0,0):('h',5),(2,5):('v',4),(1,4):('w',3),(4,3):('h',2),(5,0):('h',3),(2,2):('v',4),(4,8):('w',5),(8,8):('w',2),(5,9):('v',4)}
+
+	config.nous = 'v'
+	config.eux = 'w'
+
+	board = Board(grid,10,10)
+	stuxnet = Stuxnet()
+	stuxnet.update_game_graph(board)
+	pprint.pprint(stuxnet.find_smart_move())
+
+if __name__=="__main__":
+    main()
