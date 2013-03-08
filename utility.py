@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import config
 from random import choice
-
+import math
 
 
 
@@ -182,42 +182,43 @@ def go_attack_ennemies(any_board, position):
 
     """
 
-class vector_position():
-
-    def __init__(type, coord, number):
-        self.type = type
+class VectorPosition():
+    def __init__(self, kind, coord, number):
+        self.kind = kind   # 'v', 'w' or 'h'
         self.coord = coord
         self.number = number
-
-    def type(self):
-        return self.type
+"""
+    def kind(self):
+        return self.kind
 
     def coord(self):
         return self.coord
 
     def number(self):
-        return self.number
+        return self.number"""
 
 
 
-class board():
+class Board():
     """ Class to handle boards"""
-    def __init__(self):
-        self.grid = {}
+    def __init__(self,grid,x,y):
+        self.grid = grid  #{coord:(kind,number)}
+        self.x_size = x
+        self.y_size = y
 
     def our_positions(self):
         """
-        formerly getOurPositions(any_board)
+        formerly getour_positions(any_board)
         entree: board, nous
         retourne: liste de tuples qui nous donne nos positions et notre nombre sur ces positions
         NB: ne verifie pas la validite des coordonees
         """
-        ourPositions =[]
+        our_positions =[]
 
-        for k in self.grid: 
+        for k in self.grid.keys(): 
             if self.grid[k][0] == config.nous: 
-                ourPositions.append((k, self.grid[k][1]))
-        return ourPositions
+                our_positions.append(VectorPosition(self.grid[k][0],k,self.grid[k][1]))
+        return our_positions
 
 
     def ennemy_positions(self):
@@ -227,26 +228,25 @@ class board():
         retourne: liste de tuples qui nous donne la position des ennemis et leur nombre sur ces positions
         NB: ne verifie pas la validite des coordonees
         """
-        ennemyPositions = []
-        for k in self.grid:
-            if self.grid[k][0] == config.eux:
-                ennemyPositions.append((k, self.grid[k][1]))
-        return ennemyPositions
+        ennemy_positions = []
+        for k in self.grid.keys(): 
+            if self.grid[k][0] == config.eux: 
+                ennemy_positions.append(VectorPosition(self.grid[k][0],k,self.grid[k][1]))
+        return ennemy_positions
 
 
     def human_positions(self):
         """
-        formerly getHumanPositions(any_board)
+        formerly gethuman_positions(any_board)
         entree: board
         retourne: liste de tuples qui nous donne la position des humains et leur nombre sur ces positions
         NB: ne verifie pas la validite des coordonees
         """
-        humanPositions = []
-
-        for k in self.grid:
-            if self.grid[k][0] == 'h':
-                humanPositions.append((k, self.grid[k][1]))
-        return humanPositions
+        human_positions = []
+        for k in self.grid.keys(): 
+            if self.grid[k][0] == 'h': 
+                human_positions.append(VectorPosition(self.grid[k][0],k,self.grid[k][1]))
+        return human_positions
 
     def human_number(self): #to be checked
         """
@@ -277,51 +277,51 @@ class board():
 
 
 
-    def anyEnnemyClose(any_board):
+    def ennemy_close(self):
         """
         formerly anyEnnemyClose(any_board)
         retourne: un dico avec en clé: tuple de positions des ennemis qui snt adjacents à une de nos positions, et en valeur un tuple (tuples de nos positions mmenacées, nombre de nos creatures présentes sur cette case)
         """
-        ourPositions = getOurPositions(self.grid)
-        ennemyPositions = getEnnemyPositions(self.grid)
+        our_positions = self.our_positions()
+        ennemy_positions = self.ennemy_positions()
         allDistances = []
-        for ourPosition in ourPositions:
-            for ennemyPosition in ennemyPositions:
-                distance = computeMinDistance(ourPosition[0], ennemyPosition[0])
-                allDistances.append((ourPosition, ennemyPosition, distance))
+        for our_position in our_positions:
+            for ennemy_position in ennemy_positions:
+                distance = computeMinDistance(our_position.coord, ennemy_position.coord)
+                allDistances.append((our_position, ennemy_position, distance))
         return sorted(allDistances, key=lambda distance: distance[2])
 
 
 
-    def anyHumanClose(any_board):
+    def human_close(self):
         """
-        formerly
+        formerly anyHumanClose(any_board)
         retourne: un dico avec en clé: tuple de positions des humains qui snt adjacents à une de nos positions, et en valeur un tuple (tuples de nos positions mmenacées, nombre de nos creatures présentes sur cette case)
         """
-        ourPositions = getOurPositions(self.grid)
-        humanPositions = getHumanPositions(self.grid)
+        our_positions = self.our_positions()
+        human_positions = self.human_positions()
         allDistances = []
-        for ourPosition in ourPositions:
-            for humanPosition in humanPositions:
-                distance = computeMinDistance(ourPosition[0], humanPosition[0])
-                allDistances.append((ourPosition, humanPosition, distance))
+        for our_position in our_positions:
+            for human_position in human_positions:
+                distance = computeMinDistance(our_position.coord, human_position.coord)
+                allDistances.append((our_position, human_position, distance))
         return sorted(allDistances, key=lambda distance: distance[2])
 
 
-    def sum_min_distance_us_human_delta(any_board):
+    def sum_min_distance_us_human_delta(self):
         """
-        formerly 
+        formerly sum_min_distance_us_human_delta(any_board)
         """
         dist = 0
-        our_positions = getOurPositions(self.grid) #[((x,y),number)]
-        human_positions = get_human_positions(self.grid) #[((x,y),number)]
+        our_positions = self.our_positions() #[((x,y),number)]
+        human_positions = self.human_positions() #[((x,y),number)]
         for our_position in our_positions:
-            local_dist= +inf
+            local_dist= float("inf")
             local_coef=0 #will be set to +1 if humans outnumber us
             for human_position in human_positions:
-                if computeMinDistance(our_position[0],human_position[0]) < local_dist:
-                    local_dist = computeMinDistance(our_position[0],human_position[0])
-                    if our_position[1]<human_position[1]:
+                if computeMinDistance(our_position.coord,human_position.coord) < local_dist:
+                    local_dist = computeMinDistance(our_position.coord,human_position.coord)
+                    if our_position.number<human_position.number:
                         local_coef = 1
                     else:
                         local_coef = -1
@@ -330,20 +330,20 @@ class board():
 
 
 
-    def sum_min_distance_us_ennemy_delta(any_board):
+    def sum_min_distance_us_ennemy_delta(self):
         """
         formerly sum_min_distance_us_ennemy_delta(any_board)
         """
         dist = 0
-        our_positions = getOurPositions(self.grid) #[((x,y),number)]
-        ennemy_positions = get_ennemy_positions(self.grid) #[((x,y),number)]
+        our_positions = self.our_positions()
+        ennemy_positions = self.ennemy_positions() 
         for our_position in our_positions:
-            local_dist= +inf
+            local_dist= float("inf")
             local_coef=0 #will be set to -1 if ennemies outnumber us
             for ennemy_position in ennemy_positions:
-                if computeMinDistance(our_position[0],ennemy_position[0]) < local_dist:
-                    local_dist = computeMinDistance(our_position[0],ennemy_position[0])
-                    if our_position[1]<ennemy_position[1]:
+                if computeMinDistance(our_position.coord,ennemy_position.coord) < local_dist:
+                    local_dist = computeMinDistance(our_position.coord,ennemy_position.coord)
+                    if our_position.number<ennemy_position.number:
                         local_coef = -1
                     else:
                         local_coef = +1
@@ -352,21 +352,21 @@ class board():
 
 
 
-    def sum_min_distance_ennemy_human_delta(any_board):
+    def sum_min_distance_ennemy_human_delta(self):
         """
-        formerly 
+        formerly sum_min_distance_ennemy_human_delta(any_board)
         """
 
         dist = 0
-        ennemy_positions = get_ennemy_positions(self.grid) #[((x,y),number)]
-        human_positions = get_human_positions(self.grid) #[((x,y),number)]
+        ennemy_positions = self.ennemy_positions()
+        human_positions = self.human_positions()
         for ennemy_position in ennemy_positions:
-            local_dist= +inf
+            local_dist= float("inf")
             local_coef=0 #will be set to +1 if humans outnumber ennemies
             for human_position in human_positions:
-                if computeMinDistance(ennemy_position[0],human_position[0]) < local_dist:
-                    local_dist = computeMinDistance(ennemy_position[0],human_position[0])
-                    if ennemy_position[1]<human_position[1]:
+                if computeMinDistance(ennemy_position.coord,human_position.coord) < local_dist:
+                    local_dist = computeMinDistance(ennemy_position.coord,human_position.coord)
+                    if ennemy_position.number<human_position.number:
                         local_coef = 1
                     else:
                         local_coef = -1
@@ -375,18 +375,11 @@ class board():
 
 
 
-    def heuristic_delta(ennemy_number_delta, our_number_delta,human_number_delta, sum_min_distance_us_human_delta, sum_min_distance_us_ennemy_delta, sum_min_distance_ennemy_human_delta):
-        """
-        positive = favorable
-        """
-        return (30*our_number_delta - 20*ennemy_number_delta - 10*human_number_delta - sum_min_distance_us_human_delta + sum_min_distance_us_ennemy_delta + sum_min_distance_ennemy_human_delta)
-
-
     def score(self):
         """
         positive = favorable
         """
-        return (30*getOurNumber(any_board) - 20*ennemy_number_delta - 10*human_number_delta - sum_min_distance_us_human_delta + sum_min_distance_us_ennemy_delta + sum_min_distance_ennemy_human_delta)
+        return (30*self.our_number() - 20*self.ennemy_number() - 10*self.human_number() - self.sum_min_distance_us_human_delta() + self.sum_min_distance_us_ennemy_delta() + self.sum_min_distance_ennemy_human_delta())
 
 
 
@@ -394,9 +387,46 @@ class board():
         """
         
         """
-        human_positions = get_human_positions(self.grid) #[((x,y),number)]
-        our_positions = getOurPositions(self.grid)
+        human_positions = self.grid.human_positions() 
+        our_positions = self.grid.our_positions() 
         human_targets=[] #de la forme [((x,y),nombre,distance min à notre position, notre nombre sur cette position]
         for human_position in human_positions:
             for our_position in our_positions:
-                human_targets.append((human_position[0],human_position[1],computeMinDistance(human_positions[0],our_position[0]),our_position[1]))
+                human_targets.append((human_position.coord,human_position.number,computeMinDistance(human_positions[0],our_position.coord),our_position.number))
+
+
+def main():
+    """
+    to run the tests
+    this part is executed only when the file is executed in command line 
+    (ie not executed when imported in another file)
+    """
+    grid = {(0,0):('h',5),(2,5):('v',4),(1,4):('w',3),(4,3):('h',2),(5,0):('h',3),(2,2):('v',4),(4,8):('w',5),(8,8):('w',2),(5,9):('v',4)}
+
+    config.nous = 'v'
+    config.eux = 'w'
+
+    v = VectorPosition('v', (5,0),4)
+    print v.coord
+
+
+    #instanciate a board:
+    board = Board(grid,10,10)
+
+    #test methods:
+    print '-'*50
+    print "Nombre de nos creatures: "+str(board.our_number())
+    print "Nombre d'humains: "+str(board.human_number())
+    print "Nombre d'ennemis: "+str(board.ennemy_number())
+    print '-'*50
+    print "Nos positions: " + str(board.our_positions())
+    print "Notre premiere position: "+str(board.our_positions()[0])
+    print "Les coordonnees de notre premiere position: "+str((board.our_positions()[0]).coord)
+    print '-'*50
+    print "Nos ennemis proches sont: " + str(board.ennemy_close())
+    print "Les humains proches sont: " + str(board.human_close())
+    print '-'*50
+    print "le score heuristique du board est: "+str(board.score())
+
+if __name__=="__main__":
+    main()
