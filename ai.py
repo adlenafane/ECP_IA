@@ -1,4 +1,5 @@
 from utility import getOurPositions, getEnnemyPositions, getHumanPositions
+
 class Stuxnet():
 	""" Class to handle our AI"""
 	def __init__(self, arg):
@@ -27,32 +28,39 @@ class Stuxnet():
 			# For the future we will probably have to implement a .pop() or similar
 			currentBoard = self.stackToEvaluate[0]
 
+			'''For testing purpose, we have to "pop" the element IRL '''
+			self.stackToEvaluate = []
 			# From the possibility (a board) compute the next smart possible moves
 			bestMoves = self.findBestMoves(currentBoard)
 
+			''' IRL we have to add the next elements to evaluate in the stackToEvaluate '''
 		nextOrder = self.selectBestMove(bestMoves)
 		return nextOrder
 
 	def findBestMoves(self, currentBoard):
 		'''
 			From a given board, evaluate all the missions in mission list
-			Generate all the outputs for this mission and make a first clean
+			And for all the mission, generate all the outputs for this mission and make a first clean
 		'''
 		ourPositions = getOurPositions(currentBoard)
 		ennemyPositions = getEnnemyPositions(currentBoard)
 		humanPositions = getHumanPositions(currentBoard)
 		# Concatene all positions (we may want to attack ennemies and humans and we may want to rally our friends)
 		allPositions = ourPositions + ennemyPositions + humanPositions
+
+		# Receiver for all the alternatives we may find
 		alternatives = []
 		for ourPosition in ourPositions:
 			for otherPosition in allPositions:
+				# Let's consider the distincts cases
 				if otherPosition != ourPosition:
 					for mission in self.missionList:
-						# if mission complies with case:
-						missionResult = self.computeMissionResult(currentBoard, mission, ourPosition, otherPosition)
-						missionScore = self.computeMissionScore(missionResult)
-						alternatives.append((missionResult, missionScore))
-		moves = alternatives.sort()
+						# if mission complies with case : #We should not try not attack ourPositions
+						targetBoard, nextOrder = self.computeMissionResult(currentBoard, mission, ourPosition, otherPosition)
+						missionScore = self.computeMissionScore(mission, currentBoard, targetBoard)
+						alternatives.append((targetBoard, nextOrder, missionScore))
+		# Sort eh list based on the score
+		# moves = alternatives.sort()
 
 		moves = []
 
@@ -61,11 +69,13 @@ class Stuxnet():
 
 	def computeMissionResult(currentBoard, mission, ourPosition, otherPosition):
 		'''
-			From the current board, the mission and the 2 considered elements compute the targeted board
+			From the current board, the mission and the 2 considered elements compute the targeted board and the next order
 		'''
 		newBoard = {}
-		return newBoard
-	def computecomputeMissionScore(self, mission):
+		nextOrder = []
+		return newBoard, nextOrder
+
+	def computecomputeMissionScore(self, mission, currentBoard, targetBoard):
 		'''
 			Compute the score of a given mission, based on the heuristic function 
 		'''
