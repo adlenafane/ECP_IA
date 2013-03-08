@@ -2,7 +2,7 @@
 import socket, struct
 from pprint import pprint
 import config
-from utility import next_coord
+from utility import next_coord, getOurPositions
 from random import choice
 
 
