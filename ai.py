@@ -1,5 +1,7 @@
-from utility import Board, VectorPosition
+from utility import findNextMove
 import copy
+import random
+from operator import itemgetter
 
 class Stuxnet():
 	""" Class to handle our AI"""
@@ -34,10 +36,10 @@ class Stuxnet():
 			'''For testing purpose, we have to "pop" the element IRL '''
 			self.stack_to_evaluate = []
 			# From the possibility (a board) compute the next smart possible moves
-			best_moves = self.find_best_moves(current_board)
+			best_order = self.find_best_moves(current_board)
 
 			''' IRL we have to add the next elements to evaluate in the stack_to_evaluate '''
-		next_order = self.select_best_move(best_moves)
+		next_order = self.select_best_move(best_order)
 		return next_order
 
 	def find_best_moves(self, current_board):
@@ -60,15 +62,12 @@ class Stuxnet():
 						# We should not try not attack our_positions
 						if self.is_mission_compliant(other_position.kind(), mission):
 							target_board, next_order = self.compute_mission_result(current_board, mission, our_position, other_position)
-							missionScore = self.computeMissionScore(mission, current_board, target_board)
+							missionScore = self.compute_missioN_score(mission, current_board, target_board)
 							alternatives.append((target_board, next_order, missionScore))
 		# Sort the list based on the score
-		# moves = alternatives.sort()
-
-		moves = []
-
-		best_moves = self.cleanMoves(moves)
-		return best_moves
+		sorted(alternatives, key=itemgetter(2), reverse=True)
+		order = self.generate_move(alternatives)
+		return order
 
 	def is_mission_compliant(self, other_position_kind, mission):
 		'''
@@ -101,22 +100,20 @@ class Stuxnet():
 		
 		return new_board, next_order
 
-	def computeMissionScore(self, mission, current_board, target_board):
+	def compute_missioN_score(self, mission, current_board, target_board):
 		'''
 			Compute the score of a given mission, based on the heuristic function 
 		'''
-		return 0
+		return random.randint(1, 10)
 
-	def cleanMoves(self, moves):
-		'''
-			From a list of moves, keeps only the best ones (TOP 5 or only those with a given score...)
-		'''
-		best_moves = []
-		return best_moves
-
-	def select_best_move(self, best_moves):
+	def select_best_move(self, best_order):
 		'''
 			Once we have computed all the possible move, select the best one
 		'''
-		next_order = []
-		return next_order
+		return best_order
+
+	def generate_move(self, alternatives):
+		'''
+			From a list of alternatives (e.g. possible orders), find the best compliant one
+		'''
+		return alternatives
