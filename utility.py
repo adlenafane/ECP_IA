@@ -315,17 +315,18 @@ class Board():
         dist = 0
         our_positions = self.our_positions() #[((x,y),number)]
         human_positions = self.human_positions() #[((x,y),number)]
-        for our_position in our_positions:
-            local_dist= float("inf")
-            local_coef=0 #will be set to +1 if humans outnumber us
-            for human_position in human_positions:
-                if computeMinDistance(our_position.coord,human_position.coord) < local_dist:
-                    local_dist = computeMinDistance(our_position.coord,human_position.coord)
-                    if our_position.number<human_position.number:
-                        local_coef = 1
-                    else:
-                        local_coef = -1
-            dist+=local_dist*local_coef
+        if human_positions:
+            for our_position in our_positions:
+                local_dist= float("inf")
+                local_coef=0 #will be set to +1 if humans outnumber us
+                for human_position in human_positions:
+                    if computeMinDistance(our_position.coord,human_position.coord) < local_dist:
+                        local_dist = computeMinDistance(our_position.coord,human_position.coord)
+                        if our_position.number<human_position.number:
+                            local_coef = 1
+                        else:
+                            local_coef = -1
+                dist+=local_dist*local_coef
         return dist
 
 
@@ -335,18 +336,21 @@ class Board():
         formerly sum_min_distance_us_ennemy_delta(any_board)
         """
         dist = 0
+        our_positions = self.our_positions() #[((x,y),number)]
+        ennemy_positions = self.ennemy_positions() #[((x,y),number)]
 
-        for our_position in self.our_positions():
-            local_dist= float("inf")
-            local_coef=0 #will be set to -1 if ennemies outnumber us
-            for ennemy_position in self.ennemy_positions():
-                if computeMinDistance(our_position.coord,ennemy_position.coord) < local_dist:
-                    local_dist = computeMinDistance(our_position.coord,ennemy_position.coord)
-                    if our_position.number<ennemy_position.number:
-                        local_coef = -1
-                    else:
-                        local_coef = +1
-            dist+=local_dist*local_coef
+        if ennemy_positions:
+            for our_position in our_positions:
+                local_dist= float("inf")
+                local_coef=0 #will be set to -1 if ennemies outnumber us
+                for ennemy_position in ennemy_positions:
+                    if computeMinDistance(our_position.coord,ennemy_position.coord) < local_dist:
+                        local_dist = computeMinDistance(our_position.coord,ennemy_position.coord)
+                        if our_position.number<ennemy_position.number:
+                            local_coef = -1
+                        else:
+                            local_coef = +1
+                dist+=local_dist*local_coef
         return dist
 
 
@@ -359,17 +363,18 @@ class Board():
         dist = 0
         ennemy_positions = self.ennemy_positions()
         human_positions = self.human_positions()
-        for ennemy_position in ennemy_positions:
-            local_dist= float("inf")
-            local_coef=0 #will be set to +1 if humans outnumber ennemies
-            for human_position in human_positions:
-                if computeMinDistance(ennemy_position.coord,human_position.coord) < local_dist:
-                    local_dist = computeMinDistance(ennemy_position.coord,human_position.coord)
-                    if ennemy_position.number<human_position.number:
-                        local_coef = 1
-                    else:
-                        local_coef = -1
-            dist+=local_dist*local_coef
+        if human_positions:
+            for ennemy_position in ennemy_positions:
+                local_dist= float("inf")
+                local_coef=0 #will be set to +1 if humans outnumber ennemies
+                for human_position in human_positions:
+                    if computeMinDistance(ennemy_position.coord,human_position.coord) < local_dist:
+                        local_dist = computeMinDistance(ennemy_position.coord,human_position.coord)
+                        if ennemy_position.number<human_position.number:
+                            local_coef = 1
+                        else:
+                            local_coef = -1
+                dist+=local_dist*local_coef
         return dist
 
 
