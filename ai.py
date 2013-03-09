@@ -1,13 +1,13 @@
 from utility import findNextMove, Board
 import config
 import copy
-import random
 import pprint
 from operator import itemgetter
 
 class Stuxnet():
 	""" Class to handle our AI"""
 	def __init__(self, mission_list = ['attack'], game_graph = [], stack_to_evaluate = []):
+		print "Stuxnet::__init__"
 		self.mission_list = mission_list
 		self.game_graph =  game_graph
 		self.stack_to_evaluate = stack_to_evaluate
@@ -20,6 +20,8 @@ class Stuxnet():
 			- Remind the past
 			- Cut only the wrong branches
 		'''
+		print "Stuxnet::update_game_graph"
+
 		self.game_graph = [board]
 	
 	def find_smart_move(self):
@@ -28,6 +30,8 @@ class Stuxnet():
 			Implementation of the min/max or alpha/beta :)
 			For now we make only one round (just find_best_moves actually)
 		'''
+		print "Stuxnet::find_smart_move"
+
 		# Add current element to the stack
 		self.stack_to_evaluate.append(self.game_graph[0])
 		while self.stack_to_evaluate != []:
@@ -52,6 +56,7 @@ class Stuxnet():
 			From a given board, evaluate all the missions in mission list
 			And for all the mission, generate all the outputs for this mission and make a first clean
 		'''
+		print "Stuxnet::find_best_moves"
 		# Receiver for all the alternatives we may find
 		alternatives = []
 
@@ -68,7 +73,7 @@ class Stuxnet():
 
 			for other_position in current_board.ennemy_positions():
 				# Let's consider the distincts cases
-				if other_position != our_position:
+				if other_position.coord != our_position.coord:
 					for mission in self.mission_list:
 						# We should not try not attack our_positions
 						if self.is_mission_compliant(other_position.kind, mission):
@@ -77,7 +82,7 @@ class Stuxnet():
 
 			for other_position in current_board.human_positions():
 				# Let's consider the distincts cases
-				if other_position != our_position:
+				if other_position.coord != our_position.coord:
 					for mission in self.mission_list:
 						# We should not try not attack our_positions
 						if self.is_mission_compliant(other_position.kind, mission):
@@ -93,12 +98,14 @@ class Stuxnet():
 			From the kind of the other position evaluate if the mission makes sense
 			For instance 'e', attack will return True but 'o', attack will return False
 		'''
+		print "Stuxnet::is_mission_compliant"
 		return True
 
 	def compute_mission_result(self, current_board, mission, our_position, other_position):
 		'''
 			From the current board, the mission and the 2 considered elements compute the targeted board and the next order
 		'''
+		print "Stuxnet::compute_mission_result"
 		new_board = copy.deepcopy(current_board)
 		next_order = []
 
@@ -125,6 +132,7 @@ class Stuxnet():
 		'''
 			Once we have computed all the possible move, select the best one
 		'''
+		print "Stuxnet::select_best_move"
 		return best_order[0]
 
 	def generate_move(self, alternatives):
