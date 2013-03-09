@@ -58,11 +58,16 @@ class Stuxnet():
 		'''
 		print "Stuxnet::find_best_moves"
 		# Receiver for all the alternatives we may find
+		all_positions = []
+		all_positions.extend(current_board.our_positions())
+		all_positions.extend(current_board.human_positions())
+		all_positions.extend(current_board.ennemy_positions())
 		alternatives = []
+
 
 		# Let's go throught all possibilites !
 		for our_position in current_board.our_positions():
-			for other_position in current_board.our_positions():
+			for other_position in all_positions:
 				# Let's consider the distincts cases
 				if other_position.coord != our_position.coord:
 					for mission in self.mission_list:
@@ -75,31 +80,6 @@ class Stuxnet():
 							print "Distancce", computeMinDistance(our_position.coord, other_position.coord)
 							alternatives.append((target_board, next_order, mission_score))
 
-			for other_position in current_board.ennemy_positions():
-				# Let's consider the distincts cases
-				if other_position.coord != our_position.coord:
-					for mission in self.mission_list:
-						# We should not try not attack our_positions
-						if self.is_mission_compliant(other_position.kind, mission):
-							target_board, next_order = self.compute_mission_result(current_board, mission, our_position, other_position)
-							mission_score = float(target_board.score()/computeMinDistance(our_position.coord, other_position.coord))
-							print "mission_score", our_position.coord, other_position.coord, 
-							print "target_board.score", target_board.score()
-							print "Distancce", computeMinDistance(our_position.coord, other_position.coord)
-							alternatives.append((target_board, next_order, mission_score))
-
-			for other_position in current_board.human_positions():
-				# Let's consider the distincts cases
-				if other_position.coord != our_position.coord:
-					for mission in self.mission_list:
-						# We should not try not attack our_positions
-						if self.is_mission_compliant(other_position.kind, mission):
-							target_board, next_order = self.compute_mission_result(current_board, mission, our_position, other_position)
-							mission_score = float(target_board.score()/computeMinDistance(our_position.coord, other_position.coord))
-							print "mission_score", our_position.coord, other_position.coord, mission_score
-							print "target_board.score", target_board.score()
-							print "Distancce", computeMinDistance(our_position.coord, other_position.coord)
-							alternatives.append((target_board, next_order, mission_score))
 		# Sort the list based on the score
 		alternatives = sorted(alternatives, key=itemgetter(2), reverse=True)
 		order = self.generate_move(alternatives)
@@ -133,12 +113,17 @@ class Stuxnet():
 				new_board.grid[other_position.coord] = (our_position.kind, our_position.number + other_position.number)
 				# Send the same number of human is enough
 				number_needed = int(other_position.number)
-			else:
-				# new_board.grid[other_position.coord] = (our_position.kind, our_position.number)
+			elif other_position.kind == config.eux:
 				# Use the probability given by the pdf to compute the estimate survivors
 				new_board.grid[other_position.coord] = (our_position.kind, float(2*our_position.number/3*other_position.number))
 				# We should send at least 1.5 time the number of ennemies
 				number_needed = int(1.5 * other_position.number) + 1
+			elif other_position.kind == config.nous:
+				new_board.grid[other_position.coord] = (our_position.kind, our_position.number + other_position.number)
+				number_needed = our_position.number
+			else:
+				number_needed = 0
+				print "That should not happens :/"
 			
 			number_sent = min(number_needed, our_position.number)
 			nextCoord = findNextMove(our_position.coord, other_position.coord)
@@ -157,7 +142,12 @@ class Stuxnet():
 
 	def generate_move(self, alternatives):
 		'''
-			From a list of alternatives (e.g. possible orders), find the best compliant one
+			From a list of alternatives (e.g. possible orders), find the best compliant one:
+			Check to have:
+			- Do not use too many people
+			- Do not make moves from the same position
+			- Do not send more than 1 attack or 3 moves
+			- Do not ask to go out of the board
 		'''
 		return alternatives
 
