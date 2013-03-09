@@ -335,12 +335,11 @@ class Board():
         formerly sum_min_distance_us_ennemy_delta(any_board)
         """
         dist = 0
-        our_positions = self.our_positions()
-        ennemy_positions = self.ennemy_positions() 
-        for our_position in our_positions:
+
+        for our_position in self.our_positions():
             local_dist= float("inf")
             local_coef=0 #will be set to -1 if ennemies outnumber us
-            for ennemy_position in ennemy_positions:
+            for ennemy_position in self.ennemy_positions():
                 if computeMinDistance(our_position.coord,ennemy_position.coord) < local_dist:
                     local_dist = computeMinDistance(our_position.coord,ennemy_position.coord)
                     if our_position.number<ennemy_position.number:
@@ -379,7 +378,14 @@ class Board():
         """
         positive = favorable
         """
-        return (30*self.our_number() - 20*self.ennemy_number() - 10*self.human_number() - self.sum_min_distance_us_human_delta() + self.sum_min_distance_us_ennemy_delta() + self.sum_min_distance_ennemy_human_delta())
+        print "40*self.our_number()", 40*self.our_number() 
+        print "20*self.ennemy_number()", 20*self.ennemy_number()
+        print "20*self.human_number()", 20*self.human_number()
+        print "self.sum_min_distance_us_human_delta()", self.sum_min_distance_us_human_delta()
+        print "self.sum_min_distance_us_ennemy_delta()", self.sum_min_distance_us_ennemy_delta()
+        print "self.sum_min_distance_ennemy_human_delta()", self.sum_min_distance_ennemy_human_delta()
+        score = 
+        return (40*self.our_number() - 20*self.ennemy_number() - 20*self.human_number() - self.sum_min_distance_us_human_delta() + self.sum_min_distance_us_ennemy_delta() + self.sum_min_distance_ennemy_human_delta())
 
 
 

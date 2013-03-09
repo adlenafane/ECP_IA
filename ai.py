@@ -1,4 +1,4 @@
-from utility import findNextMove, Board
+from utility import findNextMove, Board, computeMinDistance
 import config
 import copy
 import pprint
@@ -69,7 +69,11 @@ class Stuxnet():
 						# We should not try not attack our_positions
 						if self.is_mission_compliant(other_position.kind, mission):
 							target_board, next_order = self.compute_mission_result(current_board, mission, our_position, other_position)
-							alternatives.append((target_board, next_order, target_board.score()))
+							mission_score = float(target_board.score()/computeMinDistance(our_position.coord, other_position.coord))
+							print "mission_score", our_position.coord, other_position.coord
+							print "target_board.score", target_board.score()
+							print "Distancce", computeMinDistance(our_position.coord, other_position.coord)
+							alternatives.append((target_board, next_order, mission_score))
 
 			for other_position in current_board.ennemy_positions():
 				# Let's consider the distincts cases
@@ -78,7 +82,11 @@ class Stuxnet():
 						# We should not try not attack our_positions
 						if self.is_mission_compliant(other_position.kind, mission):
 							target_board, next_order = self.compute_mission_result(current_board, mission, our_position, other_position)
-							alternatives.append((target_board, next_order, target_board.score()))
+							mission_score = float(target_board.score()/computeMinDistance(our_position.coord, other_position.coord))
+							print "mission_score", our_position.coord, other_position.coord, 
+							print "target_board.score", target_board.score()
+							print "Distancce", computeMinDistance(our_position.coord, other_position.coord)
+							alternatives.append((target_board, next_order, mission_score))
 
 			for other_position in current_board.human_positions():
 				# Let's consider the distincts cases
@@ -87,7 +95,11 @@ class Stuxnet():
 						# We should not try not attack our_positions
 						if self.is_mission_compliant(other_position.kind, mission):
 							target_board, next_order = self.compute_mission_result(current_board, mission, our_position, other_position)
-							alternatives.append((target_board, next_order, target_board.score()))
+							mission_score = float(target_board.score()/computeMinDistance(our_position.coord, other_position.coord))
+							print "mission_score", our_position.coord, other_position.coord, mission_score
+							print "target_board.score", target_board.score()
+							print "Distancce", computeMinDistance(our_position.coord, other_position.coord)
+							alternatives.append((target_board, next_order, mission_score))
 		# Sort the list based on the score
 		alternatives = sorted(alternatives, key=itemgetter(2), reverse=True)
 		order = self.generate_move(alternatives)
@@ -120,7 +132,9 @@ class Stuxnet():
 			if other_position.kind == 'h':
 				new_board.grid[other_position.coord] = (our_position.kind, our_position.number + other_position.number)
 			else:
-				new_board.grid[other_position.coord] = (our_position.kind, our_position.number)
+				# new_board.grid[other_position.coord] = (our_position.kind, our_position.number)
+				# Use the probability given by the pdf to compute the estimate survivors
+				new_board.grid[other_position.coord] = (our_position.kind, float(2*our_position.number/3*other_position.number))
 			nextCoord = findNextMove(our_position.coord, other_position.coord)
 			next_order = ['MOV', 1, our_position.coord[0], our_position.coord[1], our_position.number, nextCoord[0], nextCoord[1]]
 		else:
