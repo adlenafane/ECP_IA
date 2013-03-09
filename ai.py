@@ -131,12 +131,18 @@ class Stuxnet():
 			# Add our team on the ennemy position
 			if other_position.kind == 'h':
 				new_board.grid[other_position.coord] = (our_position.kind, our_position.number + other_position.number)
+				# Send the same number of human is enough
+				number_needed = int(other_position.number)
 			else:
 				# new_board.grid[other_position.coord] = (our_position.kind, our_position.number)
 				# Use the probability given by the pdf to compute the estimate survivors
 				new_board.grid[other_position.coord] = (our_position.kind, float(2*our_position.number/3*other_position.number))
+				# We should send at least 1.5 time the number of ennemies
+				number_needed = int(1.5 * other_position.number) + 1
+			
+			number_sent = min(number_needed, our_position.number)
 			nextCoord = findNextMove(our_position.coord, other_position.coord)
-			next_order = ['MOV', 1, our_position.coord[0], our_position.coord[1], our_position.number, nextCoord[0], nextCoord[1]]
+			next_order = ['MOV', 1, our_position.coord[0], our_position.coord[1], number_sent, nextCoord[0], nextCoord[1]]
 		else:
 			pass
 		
