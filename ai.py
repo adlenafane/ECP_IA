@@ -82,7 +82,9 @@ class Stuxnet():
 
 		# Sort the list based on the score
 		alternatives = sorted(alternatives, key=itemgetter(2), reverse=True)
-		order = self.generate_move(alternatives)
+		print "alternatives"
+		pprint.pprint(alternatives)
+		order = self.generate_move(alternatives, current_board)
 		return order
 
 	def is_mission_compliant(self, other_position_kind, mission):
@@ -123,7 +125,7 @@ class Stuxnet():
 				number_needed = our_position.number
 			else:
 				number_needed = 0
-				print "That should not happens :/"
+				print "That should not happen :/"
 			
 			number_sent = min(number_needed, our_position.number)
 			nextCoord = findNextMove(our_position.coord, other_position.coord)
@@ -140,16 +142,84 @@ class Stuxnet():
 		print "Stuxnet::select_best_move"
 		return best_order[0]
 
-	def generate_move(self, alternatives):
+	def generate_move(self, alternatives, current_board):
 		'''
 			From a list of alternatives (e.g. possible orders), find the best compliant one:
-			Check to have:
-			- Do not use too many people
+		'''
+		print "Stuxnet::generate_move"
+		move_is_valid = False
+		while not move_is_valid:
+			order = self.smart_three_in_n(alternatives)
+			print "order", order
+			move_is_valid = self.is_order_valid(order, current_board)
+			pass
+		return alternatives
+
+	def is_order_valid(self, orders, current_board):
+		'''
+			 Check if a given order is valid
+		 	- Do not use too many people
 			- Do not make moves from the same position
 			- Do not send more than 1 attack or 3 moves
 			- Do not ask to go out of the board
+		''' 
+		print "Stuxnet::is_order_valid"
+		print "orders", orders
+		# Order length
+		if len(orders) > 3:
+			print "Order is too long (weird)"
+			return False
+
+		# Check if count is ok
+		move_count = {}
+		for order_full in orders:
+			# Order full is (Board, order, score)
+			order = order_full[1]
+			coord_start = (order[2], order[3])
+			try:
+				value = move_count[coord_start]
+			except:
+				value = -1
+			if value !=-1:
+				move_count[coord_start]+=order[4]
+			else:
+				move_count[coord_start] = order[4]
+			print move_count[coord_start]
+		for k in move_count.keys():
+			if move_count[k] > current_board.grid[k]:
+				print "Invalid split", k
+				return False
+
+		# Valid position and attack count
+		attack_count = 0
+		for order_full_1 in orders:
+			order_1 = order_full_1[1]
+			if order_1[0] == 'ATK':
+				attack_count+=1
+			if order_1[2] <= 0 or order_1[3] <= 0 or order_1[5] <= 0 or order_1[6] <= 0 \
+				or order_1[2]>config.Xsize or order_1[3]>config.Ysize or order_1[5]>config.Xsize or order_1[6]>config.Ysize:
+				print "Order asks to go out of the board: ", order_1
+				return False
+			# Check if move is valid
+			for order_full_2 in orders:
+				order_2 = order_full_2[1]
+				if order_1[4] == order_2[1] and order_1[5] == order_2[2]:
+					print "Invalid way to move our troops"
+					return False
+
+		if attack_count > 1:
+			print "Too many attacks asked"
+			return False
+
+		print "Congrats, order seems to be valid!"
+		return True
+
+
+	def smart_three_in_n(self, alternatives):
 		'''
-		return alternatives
+			Implementation of the function described by Edouard
+		'''
+		return [alternatives[0], alternatives[1]]
 
 def main():
 	"""

@@ -3,8 +3,7 @@ import socket, struct
 from pprint import pprint
 import config
 import ai
-from utility import next_coord, Board
-from random import choice
+from utility import Board
 
 
 data = []
