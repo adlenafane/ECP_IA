@@ -13,9 +13,11 @@ L'an dernier les max étaient de l'ordre de : carte 30*15 et centaine de personn
 ToDo
 ----
 
-* prevenir les boucles
+* prevenir les boucles -> encore d'actualité ???
+
 
 * reprendre heuristic step by step et incrémenter au fur et à mesure le nombre d'input
+
 
 * smart_next_move = regarde les alternatives de next move 
 		qui ne ralongent pas le chemin 
@@ -23,7 +25,6 @@ ToDo
 		ou des ennemis qui sont au plus 2/3 de fois notre nombre
 		et qui evitent de se mettre adjacents à des ennemis au moins aussi nombreux que nous
 
-* faire en sorte de ne choisir que des alternatives qui ont des objectifs différents
 
 * élaguer les triplets d'alternatives considérées
 
@@ -31,3 +32,4 @@ ToDo
 
 * implémenter minimax
 
+* rapport 
