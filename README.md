@@ -16,7 +16,11 @@ ToDo
 
 * reprendre heuristic step by step et incrémenter au fur et à mesure le nombre d'input
 
-* smart_next_move (regarde les alternatives de next move qui ne ralongent pas le chemin)
+* smart_next_move = regarde les alternatives de next move 
+		qui ne ralongent pas le chemin 
+		et qui peuvent manger des humains au plus aussi nombreux que nous
+		ou des ennemis qui sont au plus 2/3 de fois notre nombre
+		et qui evitent de se mettre adjacents à des ennemis au moins aussi nombreux que nous
 
 * faire en sorte de ne choisir que des alternatives qui ont des objectifs différents
 
