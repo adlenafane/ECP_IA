@@ -79,16 +79,19 @@ class Stuxnet():
 					for mission in self.mission_list:
 						# We should not try not attack our_positions
 						if self.is_mission_compliant(other_position.kind, mission):
-							target_board, next_order = self.compute_mission_result(current_board, mission, our_position, other_position)
-							mission_score = float(target_board.score()/(computeMinDistance(our_position.coord, other_position.coord)*computeMinDistance(our_position.coord, other_position.coord)))
+							target_board, next_order, delta_our = self.compute_mission_result(current_board, mission, our_position, other_position)
+							if target_board.score() > 0:
+								mission_score = float(target_board.score()/(computeMinDistance(our_position.coord, other_position.coord)**2)) * delta_our
+							else:
+								if delta_our > 0:
+									mission_score = float(target_board.score()*(computeMinDistance(our_position.coord, other_position.coord)**2)/ delta_our)
+								else:
+									mission_score = float(target_board.score()*(computeMinDistance(our_position.coord, other_position.coord)**2))*abs(delta_our)
 							print fmt % (our_position.coord, other_position.coord, computeMinDistance(our_position.coord, other_position.coord), other_position.kind, target_board.score(), mission_score)
-							"""print "\nMission " +str(our_position.coord) + " to "+ str(other_position.coord)+ ", target type: "+ str(other_position.kind) +", Characteristics description :"
-																												print "mission_score", mission_score
-																												print "target_board.score", target_board.score()
-																												print "target_board.our_position()", target_board.our_positions().coord
-																												print "Distance", computeMinDistance(our_position.coord, other_position.coord)"""
+
 							alternatives.append((target_board, next_order, mission_score))
 		print "-"*120
+
 		# Sort the list based on the score
 		alternatives = sorted(alternatives, key=itemgetter(2), reverse=True)
 		order = self.generate_move(alternatives, current_board)
@@ -109,6 +112,7 @@ class Stuxnet():
 		#print "\n"+"#"*50+"\nStuxnet::compute_mission_result"
 		new_board = copy.deepcopy(current_board)
 		next_order = []
+		delta_our = 0
 
 		if mission == 'attack':
 			# Remove our position from the board
@@ -121,28 +125,35 @@ class Stuxnet():
 			if other_position.kind == 'h':
 				if our_position.number >= other_position.number:
 					new_board.grid[other_position.coord] = (our_position.kind, our_position.number + other_position.number)
+					delta_our = other_position.number
 				else:
 					# We will die
-					new_board.grid[other_position.coord] = (other_position.kind, float((2/3)*other_position.number))
+					new_board.grid[other_position.coord] = (other_position.kind, other_position.number)
+					delta_our = -our_position.number
 				# Send the same number of human is enough
 				number_needed = int(other_position.number)
 			elif other_position.kind == config.eux:
-				if our_position.number >= other_position:
-					if our_position.number >= 1.5 * other_position.number:
+				if our_position.number >= other_position.number:
+					if our_position.number >= int(1.5 * other_position.number) + 1:
 						# Use the probability given by the pdf to compute the estimate survivors
 						new_board.grid[other_position.coord] = (our_position.kind, our_position.number)
+						delta_our = 1
 					else:
 						new_board.grid[other_position.coord] = (our_position.kind, float((2/3)*our_position.number))
+						delta_our = (1/3)*our_position.number
 				else:
 					if other_position.number >= 1.5 * our_position.number:
 						new_board.grid[other_position.coord] = (other_position.kind, other_position.number)
+						delta_our = -our_position.number
 					else:
 						new_board.grid[other_position.coord] = (other_position.kind, float((2/3)*other_position.number))
+						delta_our = -our_position.number
 				# We should send at least 1.5 time the number of ennemies
 				number_needed = int(1.5 * other_position.number) + 1
 			elif other_position.kind == config.nous:
 				new_board.grid[other_position.coord] = (our_position.kind, our_position.number + other_position.number)
 				number_needed = our_position.number
+				delta_our = 0
 			else:
 				number_needed = 0
 				print "That should not happen :/"
@@ -153,7 +164,7 @@ class Stuxnet():
 		else:
 			pass
 		
-		return new_board, next_order
+		return new_board, next_order, delta_our
 
 	def select_best_move(self, best_order):
 		'''
