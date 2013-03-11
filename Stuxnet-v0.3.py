@@ -165,6 +165,8 @@ while True:
         for element in order:
             print element
 
+        time.sleep(1)
+        
         send_order(sock, order)
         """
         send(sock, "MOV", 1,5,4,3,4,3)

@@ -360,11 +360,38 @@ class Stuxnet():
 		best_coord = next_coord
 		possible_move = self.get_possible_move(our_position, other_position)
 		for move in possible_move:
+			print "move", move
 			try:
+				# If there is human on this cell, we should kill them!
 				if current_board.grid[move][0] == 'h' and current_board.grid[move][1]<=our_position.number:
-					best_coord = move
+					# However it ennemies are near and too numerous, maybe we should stay away...
+					print "human found!"
+					ennemy_near = False
+					for x,y in [(move[0]+i, move[1]+j) for i in (-1,0,1) for j in (-1,0,1) if i != 0 or j != 0]:
+						print "checking", x, y
+						try:
+							if current_board.grid[(x, y)][0] == config.eux and current_board.grid[(x, y)][1] >= (our_position.number + current_board.grid[move][1]):
+								ennemy_near = True
+								print "ennemy found and too numerous", x, y, current_board.grid[(x, y)][1]
+								break
+						except:
+							pass
+					if not ennemy_near:
+						best_coord = move
 			except:
-				pass
+				ennemy_near = False
+				for x,y in [(move[0]+i, move[1]+j) for i in (-1,0,1) for j in (-1,0,1) if i != 0 or j != 0]:
+					try:
+						if current_board.grid[(x, y)][0] == config.eux and current_board.grid[(x, y)][1] >= our_position.number:
+							ennemy_near = True
+							break
+					except:
+						pass
+				if not ennemy_near:
+					if best_coord != next_coord:
+						pass
+					else:
+						best_coord = move
 		return best_coord
 
 	def get_possible_move(self, our_position, other_position):
@@ -438,7 +465,7 @@ class Stuxnet():
 						possible_move = [(our_x+1, our_y), (our_x+1, our_y+1)]
 		valid_possible_move = []
 		for move in possible_move:
-			if move[0]>0 and move[1]>0 and move[0]<config.Xsize and move[1]<config.Ysize:
+			if move[0]>=0 and move[1]>=0 and move[0]<config.Xsize and move[1]<config.Ysize:
 				valid_possible_move.append(move)
 		return valid_possible_move
 
