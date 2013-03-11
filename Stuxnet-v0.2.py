@@ -6,6 +6,13 @@ import ai
 from utility import Board
 
 
+old_stdout = sys.stdout
+
+log_file = open("message.log","w")
+
+sys.stdout = log_file
+
+
 data = []
 nb_tours = 0
 def send(sock, *messages):
@@ -213,5 +220,9 @@ while True:
 
 #Fermeture de la socket
 sock.close()
+
+sys.stdout = old_stdout
+
+log_file.close()
 
 
