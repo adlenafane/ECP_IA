@@ -16,6 +16,8 @@ ToDo
 
 * reprendre heuristic step by step et incrémenter au fur et à mesure le nombre d'input
 
-* implémenter un log dans un fichier
+* smart_next_move (regarde les alternatives de next move qui ne ralongent pas le chemin)
 
-* next_move tolérant
+* faire en sorte de ne choisir que des alternatives qui ont des objectifs différents
+
+* élaguer les triplets d'alternatives considérées
