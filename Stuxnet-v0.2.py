@@ -4,6 +4,7 @@ from pprint import pprint
 import config
 import ai
 from utility import Board
+import sys
 
 
 old_stdout = sys.stdout

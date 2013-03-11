@@ -7,7 +7,7 @@ from operator import itemgetter
 class Stuxnet():
 	""" Class to handle our AI"""
 	def __init__(self, mission_list = ['attack'], game_graph = [], stack_to_evaluate = []):
-		print "Stuxnet::__init__"
+		print "\n"+"#"*50+"\nStuxnet::__init__"
 		self.mission_list = mission_list
 		self.game_graph =  game_graph
 		self.stack_to_evaluate = stack_to_evaluate
@@ -20,7 +20,7 @@ class Stuxnet():
 			- Remind the past
 			- Cut only the wrong branches
 		'''
-		print "Stuxnet::update_game_graph"
+		print "\n"+"#"*50+"\nStuxnet::update_game_graph"
 
 		self.game_graph = [board]
 	
@@ -30,7 +30,7 @@ class Stuxnet():
 			Implementation of the min/max or alpha/beta :)
 			For now we make only one round (just find_best_moves actually)
 		'''
-		print "Stuxnet::find_smart_move"
+		print "\n"+"#"*50+"\nStuxnet::find_smart_move"
 
 		# Add current element to the stack
 		self.stack_to_evaluate.append(self.game_graph[0])
@@ -45,7 +45,7 @@ class Stuxnet():
 			best_order = self.find_best_moves(current_board)
 
 			''' IRL we have to add the next elements to evaluate in the stack_to_evaluate '''
-		pprint.pprint(best_order)
+		print "This is the sorted best order:"
 		best_order = sorted(best_order, key=itemgetter(2), reverse=True)
 		pprint.pprint(best_order)
 		next_order = self.select_best_move(best_order)
@@ -56,7 +56,7 @@ class Stuxnet():
 			From a given board, evaluate all the missions in mission list
 			And for all the mission, generate all the outputs for this mission and make a first clean
 		'''
-		print "Stuxnet::find_best_moves"
+		print "\n"+"#"*50+"\nStuxnet::find_best_moves"
 		# Receiver for all the alternatives we may find
 		all_positions = []
 		all_positions.extend(current_board.our_positions())
@@ -75,6 +75,7 @@ class Stuxnet():
 						if self.is_mission_compliant(other_position.kind, mission):
 							target_board, next_order = self.compute_mission_result(current_board, mission, our_position, other_position)
 							mission_score = float(target_board.score()/(computeMinDistance(our_position.coord, other_position.coord)*computeMinDistance(our_position.coord, other_position.coord)))
+							print "\nMission characteristics description:"
 							print "mission_score", our_position.coord, other_position.coord
 							print "target_board.score", target_board.score()
 							print "target_board.our_position()", target_board.our_positions()
@@ -91,14 +92,14 @@ class Stuxnet():
 			From the kind of the other position evaluate if the mission makes sense
 			For instance 'e', attack will return True but 'o', attack will return False
 		'''
-		print "Stuxnet::is_mission_compliant"
+		print "\n"+"#"*50+"\nStuxnet::is_mission_compliant"
 		return True
 
 	def compute_mission_result(self, current_board, mission, our_position, other_position):
 		'''
 			From the current board, the mission and the 2 considered elements compute the targeted board and the next order
 		'''
-		print "Stuxnet::compute_mission_result"
+		print "\n"+"#"*50+"\nStuxnet::compute_mission_result"
 		new_board = copy.deepcopy(current_board)
 		next_order = []
 
@@ -151,14 +152,14 @@ class Stuxnet():
 		'''
 			Once we have computed all the possible move, select the best one
 		'''
-		print "Stuxnet::select_best_move"
+		print "\n"+"#"*50+"\nStuxnet::select_best_move"
 		return best_order[0]
 
 	def generate_move(self, alternatives, current_board):
 		'''
 			From a list of alternatives (e.g. possible orders), find the best compliant one:
 		'''
-		print "Stuxnet::generate_move"
+		print "\n"+"#"*50+"\nStuxnet::generate_move"
 		move_is_valid = False
 		while not move_is_valid:
 			order = self.smart_three_in_n(alternatives)
@@ -174,7 +175,7 @@ class Stuxnet():
 			- Do not send more than 1 attack or 3 moves
 			- Do not ask to go out of the board
 		''' 
-		print "Stuxnet::is_order_valid"
+		print "\n"+"#"*50+"\nStuxnet::is_order_valid"
 		# Order length
 		if len(orders) > 3:
 			print "Order is too long (weird)"
@@ -206,8 +207,6 @@ class Stuxnet():
 			order_1 = order_full_1[1]
 			if order_1[0] == 'ATK':
 				attack_count+=1
-			print "Xsize", config.Xsize
-			print "Ysize", config.Ysize
 			if order_1[5] < 0 or order_1[6] < 0 or order_1[5]>config.Xsize or order_1[6]>config.Ysize:
 				print "Order asks to go out of the board: ", order_1
 				return False
@@ -215,9 +214,9 @@ class Stuxnet():
 			for order_full_2 in orders:
 				order_2 = order_full_2[1]
 				if order_1[5] == order_2[2] and order_1[6] == order_2[3]:
+					print "Invalid way to move our troops: "
 					print "order_1", order_1
 					print "order_2", order_2
-					print "Invalid way to move our troops"
 					return False
 
 		if attack_count > 1:
@@ -232,6 +231,7 @@ class Stuxnet():
 		'''
 			Implementation of the function described by Edouard
 		'''
+		print "\n"+"#"*50+"\nStuxnet::smart_three_in_n"
 		return [alternatives[0]]
 
 def main():

@@ -390,7 +390,7 @@ class Board():
         # print "self.sum_min_distance_us_ennemy_delta()", self.sum_min_distance_us_ennemy_delta()
         # print "self.sum_min_distance_ennemy_human_delta()", self.sum_min_distance_ennemy_human_delta()
 
-        return (30*self.our_number() - 10*self.ennemy_number() - 20*self.human_number())# - self.sum_min_distance_us_human_delta() + self.sum_min_distance_us_ennemy_delta() + self.sum_min_distance_ennemy_human_delta())
+        return (20*self.our_number() - 10*self.ennemy_number() - 20*self.human_number())# - self.sum_min_distance_us_human_delta() + self.sum_min_distance_us_ennemy_delta() + self.sum_min_distance_ennemy_human_delta())
 
 
 
