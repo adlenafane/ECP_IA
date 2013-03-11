@@ -69,8 +69,8 @@ class Stuxnet():
 		all_positions.extend(current_board.ennemy_positions())
 		alternatives = []
 
-		fmt="%20s%20s%20s%20s%20s%20s"
-		print fmt % ('coord_start', 'coord_goal', 'distance', 'target_type', 'target_board.score', 'mission_score')
+		fmt="%11s%12s%10s%13s%13s%15s"
+		print fmt % ('coord_start', 'coord_goal', 'distance', 'target_type', 'board_score', 'mission_score')
 		# Let's go throught all possibilites !
 		for our_position in current_board.our_positions():
 			for other_position in all_positions:
@@ -88,7 +88,6 @@ class Stuxnet():
 								else:
 									mission_score = float(target_board.score()*(computeMinDistance(our_position.coord, other_position.coord)**2))*abs(delta_our)
 							print fmt % (our_position.coord, other_position.coord, computeMinDistance(our_position.coord, other_position.coord), other_position.kind, target_board.score(), mission_score)
-
 							alternatives.append((target_board, next_order, mission_score))
 		print "-"*120
 
