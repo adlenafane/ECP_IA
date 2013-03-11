@@ -1,3 +1,4 @@
+
 ECP_IA
 ======
 
@@ -25,3 +26,8 @@ ToDo
 * faire en sorte de ne choisir que des alternatives qui ont des objectifs différents
 
 * élaguer les triplets d'alternatives considérées
+
+* implémenter mission fuite
+
+* implémenter minimax
+
