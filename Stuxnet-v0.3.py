@@ -9,7 +9,8 @@ import time
 
 old_stdout = sys.stdout
 
-log_file = open("message"+str(int(round(time.time() * 1000)))+".log","w")
+#log_file = open("./log/message"+str(int(round(time.time() * 1000)))+".log","w")
+log_file = open("./log/message.log","w")
 
 sys.stdout = log_file
 
@@ -43,7 +44,7 @@ class Client():
         self.s = socket.socket()
         self.s.connect(Adress)
 
-client = Client()
+client = Client(config.address)
 sock = client.s
 
 #Envoi du nom
