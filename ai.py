@@ -74,7 +74,7 @@ class Stuxnet():
 						# We should not try not attack our_positions
 						if self.is_mission_compliant(other_position.kind, mission):
 							target_board, next_order = self.compute_mission_result(current_board, mission, our_position, other_position)
-							mission_score = float(target_board.score()/computeMinDistance(our_position.coord, other_position.coord))
+							mission_score = float(target_board.score()/computeMinDistance(our_position.coord, other_position.coord)*computeMinDistance(our_position.coord, other_position.coord))
 							print "mission_score", our_position.coord, other_position.coord
 							print "target_board.score", target_board.score()
 							print "Distancce", computeMinDistance(our_position.coord, other_position.coord)
@@ -218,7 +218,7 @@ class Stuxnet():
 		'''
 			Implementation of the function described by Edouard
 		'''
-		return [alternatives[0], alternatives[1]]
+		return [alternatives[0]]
 
 def main():
 	"""
