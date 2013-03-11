@@ -215,7 +215,6 @@ class Stuxnet():
 				move_count[coord_start]+=order[4]
 			else:
 				move_count[coord_start] = order[4]
-		print "move_count", move_count
 		for k in move_count.keys():
 			print "current_board.grid[k]", current_board.grid[k][1]
 			if move_count[k] > current_board.grid[k][1]:
@@ -255,14 +254,14 @@ class Stuxnet():
 		#print "\n"+"#"*50+"\nStuxnet::smart_three_in_n"
 		alternatives = alternatives[:10]
 		for alternative_1 in alternatives:
-			print "alternative_1", alternative_1
+			#print "alternative_1", alternative_1
 			if self.is_order_valid([alternative_1], current_board):
 				for alternative_2 in alternatives:
 					if alternative_2 != alternative_1:
-						print "alternative_2", alternative_2
+						#print "alternative_2", alternative_2
 						if self.is_order_valid([alternative_1, alternative_2], current_board):
 							for alternative_3 in alternatives:
-								print "alternative_3", alternative_3
+								#print "alternative_3", alternative_3
 								if alternative_2 != alternative_3 and alternative_3 != alternative_1:
 									if self.is_order_valid([alternative_1, alternative_2, alternative_3], current_board):
 										return [alternative_1, alternative_2, alternative_3]
@@ -316,7 +315,7 @@ class Stuxnet():
 
 		#number of orders:
 		n = mov[1]
-		print 'mov', mov
+		#print 'mov', mov
 		#initialize new_mov:
 		new_mov=copy.deepcopy(mov)
 
@@ -324,7 +323,7 @@ class Stuxnet():
 		start_coords=[] #list of departure tuples [(x,y),...]
 		for i in range(n):
 			start_coords.append((mov[2+5*i],mov[3+5*i]))
-		print "start_coords", start_coords
+		#print "start_coords", start_coords
 		if n==1:
 			new_mov[4]=current_board.grid[start_coords[0]][1]
 
