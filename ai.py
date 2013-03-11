@@ -46,7 +46,7 @@ class Stuxnet():
 			''' IRL we have to add the next elements to evaluate in the stack_to_evaluate '''
 		print "\nStuxnet::find_smart_move"
 		print "This is the sorted best order:"
-		best_order = sorted(best_order, key=itemgetter(2), reverse=True)
+		#best_order = sorted(best_order, key=itemgetter(2), reverse=True)
 		#print "-"*50
 		#print "-"*50
 		#for order in best_order:
@@ -94,7 +94,8 @@ class Stuxnet():
 		# Sort the list based on the score
 		alternatives = sorted(alternatives, key=itemgetter(2), reverse=True)
 		order = self.generate_move(alternatives, current_board)
-		return order
+		order_to_send = self.generate_order_format(order)
+		return order_to_send
 
 	def is_mission_compliant(self, other_position_kind, mission):
 		'''
@@ -170,19 +171,17 @@ class Stuxnet():
 			Once we have computed all the possible move, select the best one
 		'''
 		#print "\n"+"#"*50+"\nStuxnet::select_best_move"
-		return best_order[0]
+		return best_order
 
 	def generate_move(self, alternatives, current_board):
 		'''
 			From a list of alternatives (e.g. possible orders), find the best compliant one:
 		'''
 		#print "\n"+"#"*50+"\nStuxnet::generate_move"
-		move_is_valid = False
-		while not move_is_valid:
-			order = self.smart_three_in_n(alternatives)
-			move_is_valid = self.is_order_valid(order, current_board)
-			pass
-		return alternatives
+		#move_is_valid = False
+		order = self.smart_three_in_n(alternatives, current_board)
+		#move_is_valid = self.is_order_valid(order, current_board)
+		return order
 
 	def is_order_valid(self, orders, current_board):
 		'''
@@ -212,8 +211,10 @@ class Stuxnet():
 				move_count[coord_start]+=order[4]
 			else:
 				move_count[coord_start] = order[4]
+		print "move_count", move_count
 		for k in move_count.keys():
-			if move_count[k] > current_board.grid[k]:
+			print "current_board.grid[k]", current_board.grid[k][1]
+			if move_count[k] > current_board.grid[k][1]:
 				print "\n"+"#"*50+"\nStuxnet::is_order_valid"+"\nInvalid split", k
 				return False
 
@@ -243,12 +244,54 @@ class Stuxnet():
 		return True
 
 
-	def smart_three_in_n(self, alternatives):
+	def smart_three_in_n(self, alternatives, current_board):
 		'''
 			Implementation of the function described by Edouard
 		'''
 		#print "\n"+"#"*50+"\nStuxnet::smart_three_in_n"
-		return [alternatives[0]]
+		alternatives = alternatives[:10]
+		for alternative_1 in alternatives:
+			print "alternative_1", alternative_1
+			for alternative_2 in alternatives:
+				if alternative_2 != alternative_1:
+					print "alternative_2", alternative_2
+					if self.is_order_valid([alternative_1, alternative_2], current_board):
+						for alternative_3 in alternatives:
+							print "alternative_3", alternative_3
+							if alternative_2 != alternative_3 and alternative_3 != alternative_1:
+								if self.is_order_valid([alternative_1, alternative_2, alternative_3], current_board):
+									return [alternative_1, alternative_2, alternative_3]
+						return [alternative_1, alternative_2]
+		return [alternative_1]
+
+	def generate_order_format(self, alternatives):
+		'''
+			From the best combination of alternatives, generate the proper order
+		'''
+		#print "\n"+"#"*50+"\nStuxnet::generate_order_format"
+		order_to_send = []
+		alternative_1 = alternatives[0]
+		order_to_send.extend(alternative_1[1])
+
+		if len(alternatives)>1:
+			alternative_2 = alternatives[1]
+			if alternative_1[1][2] == alternative_2[1][2] and alternative_1[1][3] == alternative_2[1][3] and alternative_1[1][5] == alternative_2[1][5] and alternative_1[1][6] == alternative_2[1][6]:
+				order_to_send[4] += alternative_2[1][4]
+			else:
+				for i in alternative_2[1][2:]:
+					order_to_send[1] = 2
+					order_to_send.extend([i])
+			if len(alternatives) > 2:
+				alternative_3 = alternatives[2]
+				if alternative_1[1][2] == alternative_3[1][2] and alternative_1[1][3] == alternative_3[1][3] and alternative_1[1][5] == alternative_3[1][5] and alternative_1[1][6] == alternative_3[1][6]:
+					order_to_send[4] += alternative_3[1][4]
+				elif alternative_2[1][2] == alternative_3[1][2] and alternative_2[1][3] == alternative_3[1][3] and alternative_2[1][5] == alternative_3[1][5] and alternative_2[1][6] == alternative_3[1][6]:
+					order_to_send[9] += alternative_3[4]
+				else:
+					for i in alternative_3[1][2:]:
+						order_to_send[1] = 3
+						order_to_send.extend([i])
+		return order_to_send
 
 def main():
 	"""
