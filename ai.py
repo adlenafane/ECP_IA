@@ -147,7 +147,7 @@ class Stuxnet():
 						new_board.grid[other_position.coord] = (other_position.kind, other_position.number)
 						delta_our = float(-our_position.number)
 					else:
-						new_board.grid[other_position.coord] = (other_position.kind, float((2.0/3)*other_position.number))
+						new_board.grid[other_position.coord] = (other_position.kind, float(other_position.number - (2.0/3)*our_position.number))
 						delta_our = float(-our_position.number)
 				# We should send at least 1.5 time the number of ennemies
 				number_needed = int(1.5 * other_position.number) + 1
