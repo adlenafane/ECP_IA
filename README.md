@@ -18,4 +18,4 @@ ToDo
 
 * implémenter un log dans un fichier
 
-* 
+* next_move tolérant

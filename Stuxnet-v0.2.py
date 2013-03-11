@@ -71,6 +71,7 @@ while True:
                                 #'v' pour les vampires
                                 #'w' pour les loups garous
 
+
         print "#################### fin du SET ###################"
         print "\n\n"
         
@@ -166,9 +167,11 @@ while True:
         n = struct.unpack('=B', sock.recv(1))[0]
         print "reception de %i changements dans le board:" %n
         changes = []
+        creatures_on_board = 0
         for i in range(n):
             x,y,humanNB,vampNB,wwNB = (struct.unpack('=B', sock.recv(1))[0] for i in range(5))
             changes.append((x,y,humanNB,vampNB,wwNB))
+            creatures_on_board += humanNB+vampNB+wwNB
         print changes
         #initialisez votre carte a partir des tuples contenus dans changes
         for change in changes:
@@ -194,6 +197,9 @@ while True:
             config.eux = 'v'
         print "nous sommes de type: %s" %config.nous
         pprint(config.board)
+
+        #initialisation constante heuristique
+        config.cst_heuri = creatures_on_board*100
 
         stuxnet.update_game_graph(Board(config.board, config.Xsize, config.Ysize))
         print "#################### fin du MAP ###################"

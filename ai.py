@@ -293,21 +293,83 @@ class Stuxnet():
 						order_to_send.extend([i])
 		return order_to_send
 
+
+	def smart_move_filter(self, mov, current_board):
+		"""
+		according to the mov order, make departing cells empty to avoid letting small groups lagging behind...
+		reminder: syntax of a mov order: ['MOV', 1, our_position.coord[0], our_position.coord[1], number_sent, nextCoord[0], nextCoord[1]]
+		"""
+
+		#number of orders:
+		n = mov[1]
+
+		#initialize new_mov:
+		new_mov=mov
+
+		#fetch departure coordinates
+		start_coords=[] #list of departure tuples [(x,y),...]
+		for i in range(n):
+			start_coords.append((mov[2+5*i],mov[3+5*i]))
+
+		if n==1:
+			new_mov[4]=current_board.grid[start_coords[0]][1]
+
+		if n==2:
+			if start_coords[0]==start_coords[1]:
+				new_mov[4]=current_board.grid[start_coords[0]][1]-mov[9] #creature number on the board minus number needed for mission 2
+			else:
+				new_mov[4]=current_board.grid[start_coords[0]][1]
+				new_mov[9]=current_board.grid[start_coords[1]][1]
+
+		if n==3:
+			if start_coords[0]==start_coords[1] and start_coords[0]==start_coords[2]:
+				new_mov[4]=current_board.grid[start_coords[0]][1]-mov[9]-mov[14]
+			elif start_coords[0]==start_coords[1]:
+				new_mov[4]=current_board.grid[start_coords[0]][1]-mov[9]
+			elif start_coords[0]==start_coords[2]:
+				new_mov[4]=current_board.grid[start_coords[0]][1]-mov[14]
+			elif start_coords[1]==start_coords[2]:
+				new_mov[9]=current_board.grid[start_coords[1]][1]-mov[14]
+
+		return new_mov
+
+
+
+
 def main():
 	"""
     to run the tests
     this part is executed only when the file is executed in command line 
     (ie not executed when imported in another file)
     """
-	grid = {(0,0):('h',5),(2,5):('v',4),(1,4):('w',3),(4,3):('h',2),(5,0):('h',3),(2,2):('v',4),(4,8):('w',5),(8,8):('w',2),(5,9):('v',4)}
+	grid = {(0,0):('h',5),(2,5):('v',4),(1,4):('w',3),(4,3):('h',2),(5,0):('h',3),(2,2):('v',4)}
+	"""
+		0 	1 	2 	3 	4 	5
+	0	h5					h3
+	1 						
+	2 			v4				
+	3 					h2			
+	4 		w3					
+	5 			v4					
+	"""
+
 
 	config.nous = 'v'
 	config.eux = 'w'
 
 	board = Board(grid,10,10)
 	stuxnet = Stuxnet()
-	stuxnet.update_game_graph(board)
-	pprint.pprint(stuxnet.find_smart_move())
+	#stuxnet.update_game_graph(board)
+	#pprint.pprint(stuxnet.find_smart_move())
+	print "test mov 1"
+	print stuxnet.smart_move_filter(['MOV', 1, 2,2,1,3,2], board)
+	print "\n"
+
+	print "test mov 2"
+	print stuxnet.smart_move_filter(['MOV', 2, 2,2,1,3,2,2,2,1,2,3], board)
+	print "\n"
+
+
 
 if __name__=="__main__":
     main()

@@ -393,13 +393,14 @@ class Board():
         positive = favorable
         """
         #print '\n'+50*'#'+"Board::score()"
-        k = (self.our_number()+self.human_number()+self.ennemy_number())*40
+        k = config.cst_heuri
         # Anti-suicide fix :)
         if self.our_number() == 0:
             return -float("inf")
         if self.ennemy_number() == 0:
-            return float('inf')
-        return (k + 40*self.our_number() - 10*self.ennemy_number() - 20*self.human_number())# - self.sum_min_distance_us_human_delta() + self.sum_min_distance_us_ennemy_delta() + self.sum_min_distance_ennemy_human_delta())
+            return float("inf") 
+        return (k + 40*self.our_number() - 10*self.ennemy_number() - 20*self.human_number() - self.sum_min_distance_us_human_delta() + self.sum_min_distance_us_ennemy_delta() + self.sum_min_distance_ennemy_human_delta())
+
 
 
 
