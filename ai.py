@@ -30,8 +30,7 @@ class Stuxnet():
 			Implementation of the min/max or alpha/beta :)
 			For now we make only one round (just find_best_moves actually)
 		'''
-		print "\n"+"#"*50+"\nStuxnet::find_smart_move"
-
+		
 		# Add current element to the stack
 		self.stack_to_evaluate.append(self.game_graph[0])
 		while self.stack_to_evaluate != []:
@@ -45,9 +44,15 @@ class Stuxnet():
 			best_order = self.find_best_moves(current_board)
 
 			''' IRL we have to add the next elements to evaluate in the stack_to_evaluate '''
+		print "\nStuxnet::find_smart_move"
 		print "This is the sorted best order:"
 		best_order = sorted(best_order, key=itemgetter(2), reverse=True)
-		pprint.pprint(best_order)
+		#print "-"*50
+		#print "-"*50
+		#for order in best_order:
+		#	print "ordre: " + str(order[1]) +", score: " + str(order[2])
+		#print "-"*50
+		#print "-"*50
 		next_order = self.select_best_move(best_order)
 		return next_order
 
@@ -56,7 +61,7 @@ class Stuxnet():
 			From a given board, evaluate all the missions in mission list
 			And for all the mission, generate all the outputs for this mission and make a first clean
 		'''
-		print "\n"+"#"*50+"\nStuxnet::find_best_moves"
+		print "\n"+"-"*120+"\nStuxnet::find_best_moves"
 		# Receiver for all the alternatives we may find
 		all_positions = []
 		all_positions.extend(current_board.our_positions())
@@ -64,7 +69,8 @@ class Stuxnet():
 		all_positions.extend(current_board.ennemy_positions())
 		alternatives = []
 
-
+		fmt="%20s%20s%20s%20s%20s%20s"
+		print fmt % ('coord_start', 'coord_goal', 'distance', 'target_type', 'target_board.score', 'mission_score')
 		# Let's go throught all possibilites !
 		for our_position in current_board.our_positions():
 			for other_position in all_positions:
@@ -75,13 +81,14 @@ class Stuxnet():
 						if self.is_mission_compliant(other_position.kind, mission):
 							target_board, next_order = self.compute_mission_result(current_board, mission, our_position, other_position)
 							mission_score = float(target_board.score()/(computeMinDistance(our_position.coord, other_position.coord)*computeMinDistance(our_position.coord, other_position.coord)))
-							print "\nMission " +str(our_position.coord) + " to "+ str(other_position.coord)+ ", target type: "+ str(other_position.kind) +", Characteristics description :"
-							print "mission_score", mission_score
-							print "target_board.score", target_board.score()
-							print "target_board.our_position()", target_board.our_positions()
-							print "Distance", computeMinDistance(our_position.coord, other_position.coord)
+							print fmt % (our_position.coord, other_position.coord, computeMinDistance(our_position.coord, other_position.coord), other_position.kind, target_board.score(), mission_score)
+							"""print "\nMission " +str(our_position.coord) + " to "+ str(other_position.coord)+ ", target type: "+ str(other_position.kind) +", Characteristics description :"
+																												print "mission_score", mission_score
+																												print "target_board.score", target_board.score()
+																												print "target_board.our_position()", target_board.our_positions().coord
+																												print "Distance", computeMinDistance(our_position.coord, other_position.coord)"""
 							alternatives.append((target_board, next_order, mission_score))
-
+		print "-"*120
 		# Sort the list based on the score
 		alternatives = sorted(alternatives, key=itemgetter(2), reverse=True)
 		order = self.generate_move(alternatives, current_board)
@@ -99,7 +106,7 @@ class Stuxnet():
 		'''
 			From the current board, the mission and the 2 considered elements compute the targeted board and the next order
 		'''
-		print "\n"+"#"*50+"\nStuxnet::compute_mission_result"
+		#print "\n"+"#"*50+"\nStuxnet::compute_mission_result"
 		new_board = copy.deepcopy(current_board)
 		next_order = []
 
@@ -222,7 +229,7 @@ class Stuxnet():
 			print "\n"+"#"*50+"\nStuxnet::is_order_valid"+"\nToo many attacks asked"
 			return False
 
-		print "\n"+"#"*50+"\nStuxnet::is_order_valid"+"\nCongrats, order seems to be valid!"
+		#print "\n"+"#"*50+"\nStuxnet::is_order_valid"+"\nCongrats, order seems to be valid!"
 		return True
 
 

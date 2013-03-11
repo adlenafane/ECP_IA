@@ -22,7 +22,7 @@ def send(sock, *messages):
     for message in messages:
         try:
             data = struct.pack('=B', message) if isinstance(message, int) else message
-            print data
+            #print data
             sock.send(data)
         except:
             print("Couldn't send message: ", message)
@@ -130,16 +130,16 @@ while True:
                     print "UPD a transmis une case vide qui etait deja vide"
             else:
                 print "je n'ai pas compris l'ordre UPD"
-        pprint(config.board)
+        #pprint(config.board)
 
         current_board = Board(config.board, config.Xsize, config.Ysize)
 
-        print "our_positions"
-        pprint(current_board.our_positions())
-        print "human_positions"
-        pprint(current_board.human_positions())
-        print "ennemy_positions"
-        pprint(current_board.ennemy_positions())
+        #print "our_positions"
+        #pprint(current_board.our_positions())
+        #print "human_positions"
+        #pprint(current_board.human_positions())
+        #print "ennemy_positions"
+        #pprint(current_board.ennemy_positions())
 
         stuxnet.update_game_graph(current_board)
         
