@@ -51,8 +51,8 @@ while True:
     if order == "SET":
         lignes, colonnes = (struct.unpack('=B', sock.recv(1))[0] for i in range(2))   #B est le format pour unsigned char donc sock.recv(1) permet de lire 1 entier. The result of struct.unpack(format, string) is a tuple even if it contains exactly one item. l'opération est faite 2 fois pour récupérer ligne et colonne.
         #ici faire ce qu'il faut pour preparer votre representation de la carte
-        config.Xsize = lignes
-        config.Ysize = colonnes
+        config.Xsize = colonnes
+        config.Ysize = lignes
         #{(x,y):(type,n)}: case occupée par n personnages de type:
                                 #'h' pour les humains
                                 #'v' pour les vampires
