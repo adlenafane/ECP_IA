@@ -82,8 +82,6 @@ class Stuxnet():
 
 		# Sort the list based on the score
 		alternatives = sorted(alternatives, key=itemgetter(2), reverse=True)
-		print "alternatives"
-		pprint.pprint(alternatives)
 		order = self.generate_move(alternatives, current_board)
 		return order
 
@@ -164,7 +162,6 @@ class Stuxnet():
 			- Do not ask to go out of the board
 		''' 
 		print "Stuxnet::is_order_valid"
-		print "orders", orders
 		# Order length
 		if len(orders) > 3:
 			print "Order is too long (weird)"
@@ -196,14 +193,16 @@ class Stuxnet():
 			order_1 = order_full_1[1]
 			if order_1[0] == 'ATK':
 				attack_count+=1
-			if order_1[2] <= 0 or order_1[3] <= 0 or order_1[5] <= 0 or order_1[6] <= 0 \
+			if order_1[2] < 0 or order_1[3] < 0 or order_1[5] < 0 or order_1[6] < 0 \
 				or order_1[2]>config.Xsize or order_1[3]>config.Ysize or order_1[5]>config.Xsize or order_1[6]>config.Ysize:
 				print "Order asks to go out of the board: ", order_1
 				return False
 			# Check if move is valid
 			for order_full_2 in orders:
 				order_2 = order_full_2[1]
-				if order_1[4] == order_2[1] and order_1[5] == order_2[2]:
+				if order_1[5] == order_2[2] and order_1[6] == order_2[3]:
+					print "order_1", order_1
+					print "order_2", order_2
 					print "Invalid way to move our troops"
 					return False
 
