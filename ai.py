@@ -361,7 +361,7 @@ class Stuxnet():
 		possible_move = self.get_possible_move(our_position, other_position)
 		for move in possible_move:
 			try:
-				if current_board.grid[move][0] == 'h':
+				if current_board.grid[move][0] == 'h' and current_board.grid[move][1]<=our_position.number:
 					best_coord = move
 			except:
 				pass
