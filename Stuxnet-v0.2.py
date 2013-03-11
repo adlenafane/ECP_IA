@@ -56,6 +56,8 @@ while True:
         #ici faire ce qu'il faut pour preparer votre representation de la carte
         Xsize = lignes
         Ysize = colonnes
+        config.Xsize = Xsize
+        config.Ysize = Ysize
         #(type,n): case occupée par n personnages de type:
                                 #'h' pour les humains
                                 #'v' pour les vampires
