@@ -76,7 +76,8 @@ class Stuxnet():
 							target_board, next_order = self.compute_mission_result(current_board, mission, our_position, other_position)
 							mission_score = float(target_board.score()/(computeMinDistance(our_position.coord, other_position.coord)*computeMinDistance(our_position.coord, other_position.coord)))
 							print "\nMission characteristics description:"
-							print "mission_score", our_position.coord, other_position.coord
+							print "our_position.coord, other_position.coord", our_position.coord, other_position.coord
+							print "mission_score", mission_score
 							print "target_board.score", target_board.score()
 							print "target_board.our_position()", target_board.our_positions()
 							print "Distance", computeMinDistance(our_position.coord, other_position.coord)
