@@ -1,7 +1,6 @@
 from utility import findNextMove, Board, computeMinDistance
 import config
 import copy
-import pprint
 from operator import itemgetter
 
 class Stuxnet():
@@ -160,8 +159,12 @@ class Stuxnet():
 				print "That should not happen :/"
 			
 			number_sent = min(number_needed, our_position.number)
-			nextCoord = findNextMove(our_position.coord, other_position.coord)
-			next_order = ['MOV', 1, our_position.coord[0], our_position.coord[1], number_sent, nextCoord[0], nextCoord[1]]
+			next_coord = findNextMove(our_position.coord, other_position.coord)
+			if computeMinDistance(our_position.coord, other_position.coord) == 1:
+				next_order = ['MOV', 1, our_position.coord[0], our_position.coord[1], number_sent, next_coord[0], next_coord[1]]
+			else:
+				next_coord_optimized = self.optimize_next_move(current_board, our_position, other_position, next_coord)
+				next_order = ['MOV', 1, our_position.coord[0], our_position.coord[1], number_sent, next_coord_optimized[0], next_coord_optimized[1]]
 		else:
 			pass
 		
@@ -253,17 +256,19 @@ class Stuxnet():
 		alternatives = alternatives[:10]
 		for alternative_1 in alternatives:
 			print "alternative_1", alternative_1
-			for alternative_2 in alternatives:
-				if alternative_2 != alternative_1:
-					print "alternative_2", alternative_2
-					if self.is_order_valid([alternative_1, alternative_2], current_board):
-						for alternative_3 in alternatives:
-							print "alternative_3", alternative_3
-							if alternative_2 != alternative_3 and alternative_3 != alternative_1:
-								if self.is_order_valid([alternative_1, alternative_2, alternative_3], current_board):
-									return [alternative_1, alternative_2, alternative_3]
-						return [alternative_1, alternative_2]
-		return [alternative_1]
+			if self.is_order_valid([alternative_1], current_board):
+				for alternative_2 in alternatives:
+					if alternative_2 != alternative_1:
+						print "alternative_2", alternative_2
+						if self.is_order_valid([alternative_1, alternative_2], current_board):
+							for alternative_3 in alternatives:
+								print "alternative_3", alternative_3
+								if alternative_2 != alternative_3 and alternative_3 != alternative_1:
+									if self.is_order_valid([alternative_1, alternative_2, alternative_3], current_board):
+										return [alternative_1, alternative_2, alternative_3]
+							return [alternative_1, alternative_2]
+				return [alternative_1]
+		return [alternatives[0]]
 
 	def generate_order_format(self, alternatives):
 		'''
@@ -346,8 +351,97 @@ class Stuxnet():
 
 		return new_mov
 
+	def optimize_next_move(self, current_board, our_position, other_position, next_coord):
+		'''
+			Optimize the next move by:
+			- Stay away from the ennemy
+			- Kill humans on our way
+		'''
+		#print "\n"+"#"*50+"\nStuxnet::optimize_next_move"
+		best_coord = next_coord
+		possible_move = self.get_possible_move(our_position, other_position)
+		for move in possible_move:
+			try:
+				if current_board.grid[move][0] == 'h':
+					best_coord = move
+			except:
+				pass
+		return best_coord
 
-
+	def get_possible_move(self, our_position, other_position):
+		'''
+			Return a list of the 2 or 3 possible moves
+		'''
+		#print "\n"+"#"*50+"\nStuxnet::get_possible_move"
+		possible_move = []
+		our_x = our_position.coord[0]
+		our_y = our_position.coord[1]
+		other_x = other_position.coord[0]
+		other_y = other_position.coord[1]
+		# Same column
+		if our_x == other_x:
+			# We are above
+			if our_y < other_y:
+				possible_move = [(our_x-1, our_y+1), (our_x, our_y+1), (our_x+1, our_y+1)]
+			# We are below
+			else:
+				possible_move = [(our_x-1, our_y-1), (our_x, our_y-1), (our_x+1, our_y-1)]
+		# Same line
+		elif our_y == other_y:
+			# We are on the left
+			if our_x < other_x:
+				possible_move = [(our_x+1, our_y-1), (our_x+1, our_y), (our_x+1, our_y+1)]
+			# We are on the right
+			else:
+				possible_move = [(our_x-1, our_y-1), (our_x-1, our_y), (our_x-1, our_y+1)]
+		# We have to move on the diagonal
+		else:
+			# Other position is bottom left
+			if our_y-our_x < other_y-other_x:
+				# Other position is top left
+				# --> West
+				if our_y - (config.Xsize-our_x) < other_y - (config.Xsize - other_x):
+					# Go North West West
+					if our_y > other_y:
+						possible_move = [(our_x-1, our_y-1), (our_x-1, our_y)]
+					# Go South West West
+					else:
+						possible_move = [(our_x-1, our_y), (our_x-1, our_y+1)]
+						
+				# Other position is bottom right
+				# --> South
+				else:
+					# Go South South West
+					if our_x > other_x:
+						possible_move = [(our_x-1, our_y+1), (our_x, our_y+1)]
+					# Go South South East
+					else:
+						possible_move = [(our_x, our_y+1), (our_x+1, our_y+1)]
+			# Other position is top right
+			else:
+				# Other position is top left
+				# --> North
+				if our_y - (config.Xsize-our_x) < other_y - (config.Xsize - other_x):
+					# Go North North West
+					if our_x > other_x:
+						possible_move = [(our_x-1, our_y+1), (our_x, our_y+1)]
+					# Go North North East
+					else:
+						possible_move = [(our_x, our_y+1), (our_x+1,our_y+1)]
+				# bottom right
+				# --> East
+				else:
+					# Go North East East
+					if our_y > other_y:
+						possible_move = [(our_x+1, our_y-1), (our_x+1, our_y)]
+					#Go South East East 
+					else:
+						possible_move = [(our_x+1, our_y), (our_x+1, our_y+1)]
+		valid_possible_move = []
+		for move in possible_move:
+			if move[0]>0 and move[1]>0 and move[0]<config.Xsize and move[1]<config.Ysize:
+				valid_possible_move.append(move)
+		return valid_possible_move
 
 def main():
 	"""
