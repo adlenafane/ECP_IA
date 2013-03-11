@@ -25,5 +25,5 @@
   <Humans X="14" Y="8" Count="3"/>
 
   <Werewolves X="0" Y="0" Count="5"/>
-  <Vampires X="9" Y="0" Count="5"/>
+  <Vampires X="0" Y="8" Count="5"/>
 </Map>
