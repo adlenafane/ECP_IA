@@ -54,7 +54,8 @@ class Stuxnet():
 		#print "-"*50
 		#print "-"*50
 		next_order = self.select_best_move(best_order)
-		return next_order
+		smart_order = self.smart_move_filter(next_order, current_board)
+		return smart_order
 
 	def find_best_moves(self, current_board):
 		'''
@@ -112,7 +113,7 @@ class Stuxnet():
 		#print "\n"+"#"*50+"\nStuxnet::compute_mission_result"
 		new_board = copy.deepcopy(current_board)
 		next_order = []
-		delta_our = 0
+		delta_our = 0.0
 
 		if mission == 'attack':
 			# Remove our position from the board
@@ -125,11 +126,11 @@ class Stuxnet():
 			if other_position.kind == 'h':
 				if our_position.number >= other_position.number:
 					new_board.grid[other_position.coord] = (our_position.kind, our_position.number + other_position.number)
-					delta_our = other_position.number
+					delta_our = float(other_position.number)
 				else:
 					# We will die
 					new_board.grid[other_position.coord] = (other_position.kind, other_position.number)
-					delta_our = -our_position.number
+					delta_our = float(-our_position.number)
 				# Send the same number of human is enough
 				number_needed = int(other_position.number)
 			elif other_position.kind == config.eux:
@@ -137,23 +138,23 @@ class Stuxnet():
 					if our_position.number >= int(1.5 * other_position.number) + 1:
 						# Use the probability given by the pdf to compute the estimate survivors
 						new_board.grid[other_position.coord] = (our_position.kind, our_position.number)
-						delta_our = 1
+						delta_our = 1.0
 					else:
-						new_board.grid[other_position.coord] = (our_position.kind, float((2/3)*our_position.number))
-						delta_our = (1/3)*our_position.number
+						new_board.grid[other_position.coord] = (our_position.kind, float((2.0/3)*our_position.number))
+						delta_our = float((1.0/3)*our_position.number)
 				else:
 					if other_position.number >= 1.5 * our_position.number:
 						new_board.grid[other_position.coord] = (other_position.kind, other_position.number)
-						delta_our = -our_position.number
+						delta_our = float(-our_position.number)
 					else:
-						new_board.grid[other_position.coord] = (other_position.kind, float((2/3)*other_position.number))
-						delta_our = -our_position.number
+						new_board.grid[other_position.coord] = (other_position.kind, float((2.0/3)*other_position.number))
+						delta_our = float(-our_position.number)
 				# We should send at least 1.5 time the number of ennemies
 				number_needed = int(1.5 * other_position.number) + 1
 			elif other_position.kind == config.nous:
 				new_board.grid[other_position.coord] = (our_position.kind, our_position.number + other_position.number)
 				number_needed = our_position.number
-				delta_our = 0
+				delta_our = 0.0
 			else:
 				number_needed = 0
 				print "That should not happen :/"
@@ -272,6 +273,7 @@ class Stuxnet():
 		order_to_send = []
 		alternative_1 = alternatives[0]
 		order_to_send.extend(alternative_1[1])
+		print "alternatives", alternatives
 
 		if len(alternatives)>1:
 			alternative_2 = alternatives[1]
@@ -279,18 +281,25 @@ class Stuxnet():
 				order_to_send[4] += alternative_2[1][4]
 			else:
 				for i in alternative_2[1][2:]:
-					order_to_send[1] = 2
 					order_to_send.extend([i])
 			if len(alternatives) > 2:
 				alternative_3 = alternatives[2]
 				if alternative_1[1][2] == alternative_3[1][2] and alternative_1[1][3] == alternative_3[1][3] and alternative_1[1][5] == alternative_3[1][5] and alternative_1[1][6] == alternative_3[1][6]:
 					order_to_send[4] += alternative_3[1][4]
 				elif alternative_2[1][2] == alternative_3[1][2] and alternative_2[1][3] == alternative_3[1][3] and alternative_2[1][5] == alternative_3[1][5] and alternative_2[1][6] == alternative_3[1][6]:
-					order_to_send[9] += alternative_3[4]
+					order_to_send[9] += alternative_3[1][4]
 				else:
 					for i in alternative_3[1][2:]:
-						order_to_send[1] = 3
 						order_to_send.extend([i])
+		if len(order_to_send) == 7:
+			order_to_send[1] = 1
+		elif len(order_to_send) == 12:
+			order_to_send[1] = 2
+		elif len(order_to_send) == 17:
+			order_to_send[1] = 3
+		else:
+			print "That should not happen :/"
+		print "order_to_send", order_to_send
 		return order_to_send
 
 
@@ -302,15 +311,15 @@ class Stuxnet():
 
 		#number of orders:
 		n = mov[1]
-
+		print 'mov', mov
 		#initialize new_mov:
-		new_mov=mov
+		new_mov=copy.deepcopy(mov)
 
 		#fetch departure coordinates
 		start_coords=[] #list of departure tuples [(x,y),...]
 		for i in range(n):
 			start_coords.append((mov[2+5*i],mov[3+5*i]))
-
+		print "start_coords", start_coords
 		if n==1:
 			new_mov[4]=current_board.grid[start_coords[0]][1]
 
@@ -330,6 +339,10 @@ class Stuxnet():
 				new_mov[4]=current_board.grid[start_coords[0]][1]-mov[14]
 			elif start_coords[1]==start_coords[2]:
 				new_mov[9]=current_board.grid[start_coords[1]][1]-mov[14]
+			else:
+				new_mov[4]=current_board.grid[start_coords[0]][1]
+				new_mov[9]=current_board.grid[start_coords[1]][1]				
+				new_mov[14]=current_board.grid[start_coords[2]][1]				
 
 		return new_mov
 

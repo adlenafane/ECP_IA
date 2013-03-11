@@ -199,7 +199,7 @@ while True:
         pprint(config.board)
 
         #initialisation constante heuristique
-        config.cst_heuri = creatures_on_board*100
+        config.cst_heuri = creatures_on_board*100*Xsize*Ysize
 
         stuxnet.update_game_graph(Board(config.board, config.Xsize, config.Ysize))
         print "#################### fin du MAP ###################"
