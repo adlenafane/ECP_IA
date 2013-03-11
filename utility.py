@@ -203,8 +203,8 @@ class Board():
     """ Class to handle boards"""
     def __init__(self,grid,x,y):
         self.grid = grid  #{coord:(kind,number)}
-        self.x_size = x
-        self.y_size = y
+        self.x_max = x
+        self.y_max = y
 
     def our_positions(self):
         """
