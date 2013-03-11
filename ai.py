@@ -74,10 +74,11 @@ class Stuxnet():
 						# We should not try not attack our_positions
 						if self.is_mission_compliant(other_position.kind, mission):
 							target_board, next_order = self.compute_mission_result(current_board, mission, our_position, other_position)
-							mission_score = float(target_board.score()/computeMinDistance(our_position.coord, other_position.coord)*computeMinDistance(our_position.coord, other_position.coord))
+							mission_score = float(target_board.score()/(computeMinDistance(our_position.coord, other_position.coord)*computeMinDistance(our_position.coord, other_position.coord)))
 							print "mission_score", our_position.coord, other_position.coord
 							print "target_board.score", target_board.score()
-							print "Distancce", computeMinDistance(our_position.coord, other_position.coord)
+							print "target_board.our_position()", target_board.our_positions()
+							print "Distance", computeMinDistance(our_position.coord, other_position.coord)
 							alternatives.append((target_board, next_order, mission_score))
 
 		# Sort the list based on the score
@@ -102,20 +103,33 @@ class Stuxnet():
 		next_order = []
 
 		if mission == 'attack':
-			# Remove our position from the board, format of our_position ('coordonees', 'nombre')
+			# Remove our position from the board
 			del new_board.grid[our_position.coord]
 
-			# Remove their position from the board, format of other_position ('kind', 'coordonees', 'nombre')
+			# Remove their position from the board
 			del new_board.grid[other_position.coord]
 
 			# Add our team on the ennemy position
 			if other_position.kind == 'h':
-				new_board.grid[other_position.coord] = (our_position.kind, our_position.number + other_position.number)
+				if our_position.number >= other_position.number:
+					new_board.grid[other_position.coord] = (our_position.kind, our_position.number + other_position.number)
+				else:
+					# We will die
+					new_board.grid[other_position.coord] = (other_position.kind, float((2/3)*other_position.number))
 				# Send the same number of human is enough
 				number_needed = int(other_position.number)
 			elif other_position.kind == config.eux:
-				# Use the probability given by the pdf to compute the estimate survivors
-				new_board.grid[other_position.coord] = (our_position.kind, float(2*our_position.number/3*other_position.number))
+				if our_position.number >= other_position:
+					if our_position.number >= 1.5 * other_position.number:
+						# Use the probability given by the pdf to compute the estimate survivors
+						new_board.grid[other_position.coord] = (our_position.kind, our_position.number)
+					else:
+						new_board.grid[other_position.coord] = (our_position.kind, float((2/3)*our_position.number))
+				else:
+					if other_position.number >= 1.5 * our_position.number:
+						new_board.grid[other_position.coord] = (other_position.kind, other_position.number)
+					else:
+						new_board.grid[other_position.coord] = (other_position.kind, float((2/3)*other_position.number))
 				# We should send at least 1.5 time the number of ennemies
 				number_needed = int(1.5 * other_position.number) + 1
 			elif other_position.kind == config.nous:
@@ -148,7 +162,6 @@ class Stuxnet():
 		move_is_valid = False
 		while not move_is_valid:
 			order = self.smart_three_in_n(alternatives)
-			print "order", order
 			move_is_valid = self.is_order_valid(order, current_board)
 			pass
 		return alternatives
@@ -193,8 +206,9 @@ class Stuxnet():
 			order_1 = order_full_1[1]
 			if order_1[0] == 'ATK':
 				attack_count+=1
-			if order_1[2] < 0 or order_1[3] < 0 or order_1[5] < 0 or order_1[6] < 0 \
-				or order_1[2]>config.Xsize or order_1[3]>config.Ysize or order_1[5]>config.Xsize or order_1[6]>config.Ysize:
+			print "Xsize", config.Xsize
+			print "Ysize", config.Ysize
+			if order_1[5] < 0 or order_1[6] < 0 or order_1[5]>config.Xsize or order_1[6]>config.Ysize:
 				print "Order asks to go out of the board: ", order_1
 				return False
 			# Check if move is valid
