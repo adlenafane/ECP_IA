@@ -400,9 +400,9 @@ class Board():
         if self.ennemy_number() == 0:
             return k
         # - 20*self.human_number()
-        return (k + 40*self.our_number() - 10*self.ennemy_number()  - self.sum_min_distance_us_human_delta() + self.sum_min_distance_us_ennemy_delta() + self.sum_min_distance_ennemy_human_delta() + float(20.0*self.our_number/len(self.our_positions))
-
-
+        return (k + 40*self.our_number() - 10*self.ennemy_number() \
+            - self.sum_min_distance_us_human_delta() + self.sum_min_distance_us_ennemy_delta() \
+            + self.sum_min_distance_ennemy_human_delta() + float(20.0*self.our_number()/len(self.our_positions())))
 
 
     def human_targets(self):
