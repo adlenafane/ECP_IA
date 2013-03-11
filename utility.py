@@ -202,6 +202,7 @@ class VectorPosition():
 class Board():
     """ Class to handle boards"""
     def __init__(self,grid,x,y):
+        print '\n'+50*'#'+"Board::__init__"+str(grid)+str(x)+str(y)
         self.grid = grid  #{coord:(kind,number)}
         self.x_max = x
         self.y_max = y
@@ -213,6 +214,7 @@ class Board():
         retourne: liste de tuples qui nous donne nos positions et notre nombre sur ces positions
         NB: ne verifie pas la validite des coordonees
         """
+        print '\n'+50*'#'+"Board::our_positions()"
         our_positions =[]
 
         for k in self.grid.keys(): 
@@ -228,6 +230,7 @@ class Board():
         retourne: liste de tuples qui nous donne la position des ennemis et leur nombre sur ces positions
         NB: ne verifie pas la validite des coordonees
         """
+        print '\n'+50*'#'+"Board::ennemy_positions()"
         ennemy_positions = []
         for k in self.grid.keys(): 
             if self.grid[k][0] == config.eux: 
@@ -242,6 +245,7 @@ class Board():
         retourne: liste de tuples qui nous donne la position des humains et leur nombre sur ces positions
         NB: ne verifie pas la validite des coordonees
         """
+        print '\n'+50*'#'+"Board::human_positions()"
         human_positions = []
         for k in self.grid.keys(): 
             if self.grid[k][0] == 'h': 
@@ -254,6 +258,7 @@ class Board():
         entree: board
         retourne le nombre d'humains restants sur le plateau
         """
+        print '\n'+50*'#'+"Board::human_number()"
         #rappel: board[(x,y)]=(type, nombre)
         return sum([v[1] for k,v in self.grid.items() if v[0]=='h'])
 
@@ -263,16 +268,15 @@ class Board():
         """
         formerly getOurNumber(any_board)
         """
+        print '\n'+50*'#'+"Board::our_number()"
         return sum([v[1] for k,v in self.grid.items() if v[0]==config.nous])
-     
-
-
 
     def ennemy_number(self): #to be checked
         """
         formerly getEnnemyNumber(any_board) 
         retourne le nombre d'ennemis restants sur le plateau
         """
+        print '\n'+50*'#'+"Board::ennemy_number()"
         return sum([v[1] for k,v in self.grid.items() if v[0]==config.eux])
 
 
@@ -282,6 +286,7 @@ class Board():
         formerly anyEnnemyClose(any_board)
         retourne: un dico avec en clé: tuple de positions des ennemis qui snt adjacents à une de nos positions, et en valeur un tuple (tuples de nos positions mmenacées, nombre de nos creatures présentes sur cette case)
         """
+        print '\n'+50*'#'+"Board::ennemy_close()"
         our_positions = self.our_positions()
         ennemy_positions = self.ennemy_positions()
         allDistances = []
@@ -298,6 +303,7 @@ class Board():
         formerly anyHumanClose(any_board)
         retourne: un dico avec en clé: tuple de positions des humains qui snt adjacents à une de nos positions, et en valeur un tuple (tuples de nos positions mmenacées, nombre de nos creatures présentes sur cette case)
         """
+        print '\n'+50*'#'+"Board::human_close()"
         our_positions = self.our_positions()
         human_positions = self.human_positions()
         allDistances = []
@@ -308,10 +314,12 @@ class Board():
         return sorted(allDistances, key=lambda distance: distance[2])
 
 
+
     def sum_min_distance_us_human_delta(self):
         """
         formerly sum_min_distance_us_human_delta(any_board)
         """
+        print '\n'+50*'#'+"Board::sum_min_distance_us_human_delta()"
         dist = 0
         our_positions = self.our_positions() #[((x,y),number)]
         human_positions = self.human_positions() #[((x,y),number)]
@@ -335,6 +343,7 @@ class Board():
         """
         formerly sum_min_distance_us_ennemy_delta(any_board)
         """
+        print '\n'+50*'#'+"Board::sum_min_distance_us_ennemy_delta()"
         dist = 0
         our_positions = self.our_positions() #[((x,y),number)]
         ennemy_positions = self.ennemy_positions() #[((x,y),number)]
@@ -359,7 +368,7 @@ class Board():
         """
         formerly sum_min_distance_ennemy_human_delta(any_board)
         """
-
+        print '\n'+50*'#'+"Board::sum_min_distance_ennemy_human_delta()"
         dist = 0
         ennemy_positions = self.ennemy_positions()
         human_positions = self.human_positions()
@@ -383,6 +392,7 @@ class Board():
         """
         positive = favorable
         """
+        print '\n'+50*'#'+"Board::score()"
         # print "40*self.our_number()", 40*self.our_number() 
         # print "20*self.ennemy_number()", 20*self.ennemy_number()
         # print "20*self.human_number()", 20*self.human_number()
@@ -398,6 +408,7 @@ class Board():
         """
         
         """
+        print '\n'+50*'#'+"Board::human_targets()"
         human_positions = self.grid.human_positions() 
         our_positions = self.grid.our_positions() 
         human_targets=[] #de la forme [((x,y),nombre,distance min à notre position, notre nombre sur cette position]

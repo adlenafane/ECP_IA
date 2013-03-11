@@ -142,7 +142,6 @@ while True:
         pprint(current_board.ennemy_positions())
 
         stuxnet.update_game_graph(current_board)
-        pprint(stuxnet.update_game_graph(current_board))
         
         #calculez votre coup
         
