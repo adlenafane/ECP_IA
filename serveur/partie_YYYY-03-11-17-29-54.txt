@@ -1,0 +1,16 @@
+# Configuration du serveur
+# Merci de mettre à jour le fichir de config avec ces paramètres
+# Carte = testmap.xml
+# Coups = 500
+# Nb joueurs = 1
+PLAYER 0 Stuxnet - v0.3
+BEGIN
+PLY0 MOV 1 0 0 3 1 1
+PLY0 MOV 1 1 1 3 2 2
+PLY0 MOV 3 2 2 1 2 3 0 0 1 1 1 2 2 1 3 3
+PLY0 MOV 3 3 3 1 2 4 2 3 1 2 4 2 3 1 3 4
+PLY0 MOV 3 2 4 1 2 5 3 4 1 2 5 2 2 1 2 3
+PLY0 MOV 3 2 5 1 3 5 2 5 1 3 4 2 3 1 3 4
+PLY0 MOV 3 3 5 1 4 5 3 4 1 4 5 3 4 1 4 3
+PLY0 MOV 3 4 5 1 5 5 4 3 1 5 3 4 5 1 5 4
+PLY0 TIME OUT
