@@ -414,7 +414,7 @@ class Board():
             - self.sum_min_distance_us_human_delta() \
             + self.sum_min_distance_us_ennemy_delta() \
             + self.sum_min_distance_ennemy_human_delta() \
-            + dominance*50.0*1.0/(0.1+1.0/5*self.human_number())*self.our_number()/len(self.our_positions()))  \
+            + dominance*50.0*1.0/(0.1+1.0/5*self.human_number())*self.our_number()/len(self.our_positions())  \
             + (1-dominance)*50.0*1.0/(0.1+1.0/5*self.human_number())*len(self.our_positions())/self.our_number())
 
 
