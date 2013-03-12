@@ -153,7 +153,7 @@ class Stuxnet():
 			elif other_position.kind == config.nous:
 				new_board.grid[other_position.coord] = (our_position.kind, our_position.number + other_position.number)
 				number_needed = our_position.number
-				delta_our = 1.0
+				delta_our = 0.0
 			else:
 				number_needed = 0
 				print "That should not happen :/"
@@ -359,7 +359,6 @@ class Stuxnet():
 		#print "\n"+"#"*50+"\nStuxnet::optimize_next_move"
 		best_coord = next_coord
 		possible_move = self.get_possible_move(our_position, other_position)
-		print "possible_move", possible_move
 		for move in possible_move:
 			print "move", move
 			try:
@@ -425,44 +424,45 @@ class Stuxnet():
 		else:
 			# Other position is bottom left
 			if our_y-our_x < other_y-other_x:
-				# Other position is bottom right
-				# --> South
-				if our_y - (config.Xsize-our_x) < other_y - (config.Xsize - other_x):
-					# Go South South West
-					if our_x > other_x:
-						possible_move = [(our_x-1, our_y+1), (our_x, our_y+1)]
-					# Go South South East
-					else:
-						possible_move = [(our_x, our_y+1), (our_x+1, our_y+1)]
 				# Other position is top left
 				# --> West
-				else:
+				if our_y - (config.Xsize-our_x) < other_y - (config.Xsize - other_x):
 					# Go North West West
 					if our_y > other_y:
 						possible_move = [(our_x-1, our_y-1), (our_x-1, our_y)]
 					# Go South West West
 					else:
 						possible_move = [(our_x-1, our_y), (our_x-1, our_y+1)]
+						
+				# Other position is bottom right
+				# --> South
+				else:
+					# Go South South West
+					if our_x > other_x:
+						possible_move = [(our_x-1, our_y+1), (our_x, our_y+1)]
+					# Go South South East
+					else:
+						possible_move = [(our_x, our_y+1), (our_x+1, our_y+1)]
 			# Other position is top right
 			else:
-				# Other position is bottom right
-				# --> East
+				# Other position is top left
+				# --> North
 				if our_y - (config.Xsize-our_x) < other_y - (config.Xsize - other_x):
+					# Go North North West
+					if our_x > other_x:
+						possible_move = [(our_x-1, our_y+1), (our_x, our_y+1)]
+					# Go North North East
+					else:
+						possible_move = [(our_x, our_y+1), (our_x+1,our_y+1)]
+				# bottom right
+				# --> East
+				else:
 					# Go North East East
 					if our_y > other_y:
 						possible_move = [(our_x+1, our_y-1), (our_x+1, our_y)]
 					#Go South East East 
 					else:
 						possible_move = [(our_x+1, our_y), (our_x+1, our_y+1)]
-				# Other position is top left
-				# --> North
-				else:
-					# Go North North West
-					if our_x > other_x:
-						possible_move = [(our_x-1, our_y-1), (our_x, our_y-1)]
-					# Go North North East
-					else:
-						possible_move = [(our_x, our_y-1), (our_x+1,our_y-1)]
 		valid_possible_move = []
 		for move in possible_move:
 			if move[0]>=0 and move[1]>=0 and move[0]<config.Xsize and move[1]<config.Ysize:
