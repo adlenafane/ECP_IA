@@ -36,3 +36,5 @@ ToDo
 
 * rapport 
 
+* ajouter au top 10 des alternatives la meilleure alternative valide pour toujours envoyer des mov de 3 ordres quand on peut (vérifier qu'il en existe une...) 
+

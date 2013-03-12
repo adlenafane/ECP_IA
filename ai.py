@@ -39,7 +39,7 @@ def alternatives_same_target_clean(input_alternatives):
 
 class Stuxnet():
 	""" Class to handle our AI"""
-	def __init__(self, mission_list = ['attack'], game_graph = [], stack_to_evaluate = []):
+	def __init__(self, mission_list = ['attack','escape'], game_graph = [], stack_to_evaluate = []):
 		#print "\n"+"#"*50+"\nStuxnet::__init__"
 		self.mission_list = mission_list
 		self.game_graph =  game_graph
@@ -145,6 +145,8 @@ class Stuxnet():
 			From the kind of the other position evaluate if the mission makes sense
 			For instance 'e', attack will return True but 'o', attack will return False
 		'''
+		if mission == 'escape' and other_position_kind != config.eux :
+			return False
 		#print "\n"+"#"*50+"\nStuxnet::is_mission_compliant"
 		return True
 
@@ -201,7 +203,7 @@ class Stuxnet():
 				delta_our = 1.0
 			else:
 				number_needed = 0
-				print "That should not happen :/"
+				print "'number_needed = 0' -> That should not happen :/"
 			
 			number_sent = min(number_needed, our_position.number)
 			next_coord = findNextMove(our_position.coord, other_position.coord)
@@ -210,6 +212,16 @@ class Stuxnet():
 			else:
 				next_coord_optimized = self.optimize_next_move(current_board, our_position, other_position, next_coord)
 				next_order = ['MOV', 1, our_position.coord[0], our_position.coord[1], number_sent, next_coord_optimized[0], next_coord_optimized[1]]
+		
+		elif mission == 'escape' : # maybe add 'and self.our_number() > ennemies around' 
+			# Remove our position from the board
+			del new_board.grid[our_position.coord]
+
+			# Add our team on the escape position
+
+			
+
+
 		else:
 			pass
 		
