@@ -394,15 +394,30 @@ class Board():
         """
         #print '\n'+50*'#'+"Board::score()"
         k = config.cst_heuri
+
+        #constante de domination
+        if self.our_number()>=self.ennemy_number():
+            dominance=1
+        else:
+            dominance = 0
+
         # Anti-suicide fix :)
         if self.our_number() == 0:
             return -k
         if self.ennemy_number() == 0:
             return k
         # - 20*self.human_number()
-        return (k + 40*self.our_number() - 10*self.ennemy_number() \
-            - self.sum_min_distance_us_human_delta() + self.sum_min_distance_us_ennemy_delta() \
-            + self.sum_min_distance_ennemy_human_delta() + float(20.0*self.our_number()/len(self.our_positions())))
+
+        return (k \
+            + 20*self.our_number() \
+            - 21*self.ennemy_number()  \
+            - self.sum_min_distance_us_human_delta() \
+            + self.sum_min_distance_us_ennemy_delta() \
+            + self.sum_min_distance_ennemy_human_delta() \
+            + dominance*50.0*1.0/(0.1+1.0/5*self.human_number())*self.our_number()/len(self.our_positions()))  \
+            + (1-dominance)*50.0*1.0/(0.1+1.0/5*self.human_number())*len(self.our_positions())/self.our_number())
+
+
 
 
     def human_targets(self):

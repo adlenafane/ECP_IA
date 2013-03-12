@@ -3,6 +3,40 @@ import config
 import copy
 from operator import itemgetter
 
+
+def alternatives_same_target_clean(input_alternatives):
+	"""
+	(target_board, next_order, mission_score,other_position.coord)
+	"""
+	alternatives = input_alternatives
+	idx_to_del=[]
+
+	for i in range(len(alternatives)):
+		target = alternatives[i][3]
+		print "alternatives[i][3]: ", target
+		for j in range(i+1,len(alternatives)):
+			if alternatives[j][3]==target and alternatives[j][4]!=config.nous: 
+				alternatives.pop(j) #the alternative with same target and worse score of another alternative is removed from the list of alternatives if it's not a merge
+				return alternatives_same_target_clean(alternatives)
+	return alternatives
+
+
+"""	alternatives = input_alternatives
+	idx_to_del=[]
+
+	for i in range(len(alternatives)):
+		target = alternatives[i][3]
+		print "alternatives[i][3]: ", target
+		for j in range(i+1,len(alternatives)):
+			if alternatives[j][3]==target and alternatives[j][4]!=config.nous: 
+				idx_to_del.append(j) #the alternative with same target and worse score of another alternative is removed from the list of alternatives if it's not a merge
+		
+	for index in sorted(idx_to_del, reverse = True):  # if items were poped out during the for statement above, every time an item is poped generates an item out of range in the next iterations !
+		del alternatives[index]                       # Note that you need to delete them in reverse order so that you don't throw off the subsequent indexes.
+
+	return alternatives"""
+
+
 class Stuxnet():
 	""" Class to handle our AI"""
 	def __init__(self, mission_list = ['attack'], game_graph = [], stack_to_evaluate = []):
@@ -10,6 +44,8 @@ class Stuxnet():
 		self.mission_list = mission_list
 		self.game_graph =  game_graph
 		self.stack_to_evaluate = stack_to_evaluate
+
+
 
 	def update_game_graph(self, board):
 		'''
@@ -23,6 +59,8 @@ class Stuxnet():
 
 		self.game_graph = [board]
 	
+
+
 	def find_smart_move(self):
 		'''
 			Called once in the main loop and return the smartest order we could find
@@ -56,6 +94,8 @@ class Stuxnet():
 		smart_order = self.smart_move_filter(next_order, current_board)
 		return smart_order
 
+
+
 	def find_best_moves(self, current_board):
 		'''
 			From a given board, evaluate all the missions in mission list
@@ -84,18 +124,21 @@ class Stuxnet():
 								mission_score = float(target_board.score()/(computeMinDistance(our_position.coord, other_position.coord)**2)) * delta_our
 							else:
 								if delta_our > 0:
-									mission_score = float(target_board.score()*(computeMinDistance(our_position.coord, other_position.coord)**2)/ delta_our)
+									mission_score = float(target_board.score())*(computeMinDistance(our_position.coord, other_position.coord)**2)/ delta_our
 								else:
 									mission_score = float(target_board.score()*(computeMinDistance(our_position.coord, other_position.coord)**2))*abs(delta_our)
-							print fmt % (our_position.coord, other_position.coord, computeMinDistance(our_position.coord, other_position.coord), other_position.kind, target_board.score(), mission_score)
-							alternatives.append((target_board, next_order, mission_score))
+							print fmt % (our_position.coord, other_position.coord, computeMinDistance(our_position.coord, other_position.coord), other_position.kind, round(target_board.score(),1), round(mission_score,1))
+							alternatives.append((target_board, next_order, mission_score,other_position.coord,other_position.kind))
 		print "-"*120
 
 		# Sort the list based on the score
 		alternatives = sorted(alternatives, key=itemgetter(2), reverse=True)
+		alternatives = alternatives_same_target_clean(alternatives)
 		order = self.generate_move(alternatives, current_board)
 		order_to_send = self.generate_order_format(order)
 		return order_to_send
+
+
 
 	def is_mission_compliant(self, other_position_kind, mission):
 		'''
@@ -104,6 +147,8 @@ class Stuxnet():
 		'''
 		#print "\n"+"#"*50+"\nStuxnet::is_mission_compliant"
 		return True
+
+
 
 	def compute_mission_result(self, current_board, mission, our_position, other_position):
 		'''
@@ -153,7 +198,7 @@ class Stuxnet():
 			elif other_position.kind == config.nous:
 				new_board.grid[other_position.coord] = (our_position.kind, our_position.number + other_position.number)
 				number_needed = our_position.number
-				delta_our = 0.0
+				delta_our = 1.0
 			else:
 				number_needed = 0
 				print "That should not happen :/"
@@ -170,12 +215,16 @@ class Stuxnet():
 		
 		return new_board, next_order, delta_our
 
+
+
 	def select_best_move(self, best_order):
 		'''
 			Once we have computed all the possible move, select the best one
 		'''
 		#print "\n"+"#"*50+"\nStuxnet::select_best_move"
 		return best_order
+
+
 
 	def generate_move(self, alternatives, current_board):
 		'''
@@ -186,6 +235,8 @@ class Stuxnet():
 		order = self.smart_three_in_n(alternatives, current_board)
 		#move_is_valid = self.is_order_valid(order, current_board)
 		return order
+
+
 
 	def is_order_valid(self, orders, current_board):
 		'''
@@ -247,6 +298,7 @@ class Stuxnet():
 		return True
 
 
+
 	def smart_three_in_n(self, alternatives, current_board):
 		'''
 			Implementation of the function described by Edouard
@@ -268,6 +320,8 @@ class Stuxnet():
 							return [alternative_1, alternative_2]
 				return [alternative_1]
 		return [alternatives[0]]
+
+
 
 	def generate_order_format(self, alternatives):
 		'''
@@ -305,6 +359,7 @@ class Stuxnet():
 			print "That should not happen :/"
 		print "order_to_send", order_to_send
 		return order_to_send
+
 
 
 	def smart_move_filter(self, mov, current_board):
