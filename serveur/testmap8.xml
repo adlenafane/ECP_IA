@@ -12,13 +12,13 @@
   
   <Humans X="4" Y="0" Count="15"/>
   <Humans X="4" Y="4" Count="1"/>
-  <Humans X="4" Y="5" Count="110"/>
+  <Humans X="4" Y="5" Count="10"/>
   <Humans X="4" Y="6" Count="1"/>
   <Humans X="4" Y="10" Count="15"/>
 
   <Humans X="5" Y="0" Count="15"/>
   <Humans X="5" Y="4" Count="1"/>
-  <Humans X="5" Y="5" Count="110"/>
+  <Humans X="5" Y="5" Count="10"/>
   <Humans X="5" Y="6" Count="1"/>
   <Humans X="5" Y="10" Count="15"/>
 
@@ -29,7 +29,7 @@
   <Humans X="7" Y="2" Count="1"/>
   <Humans X="7" Y="3" Count="1"/>
   <Humans X="7" Y="7" Count="1"/>
-  <Humans X="7" Y="9" Count="1"/>
+  <Humans X="7" Y="8" Count="1"/>
 
   <Werewolves X="0" Y="0" Count="5"/>
   <Vampires X="9" Y="0" Count="5"/>
