@@ -187,6 +187,8 @@ class VectorPosition():
         self.kind = kind   # 'v', 'w' or 'h'
         self.coord = coord
         self.number = number
+        self.x=coord[0]
+        self.y=coord[1]
 """
     def kind(self):
         return self.kind
