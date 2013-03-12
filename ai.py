@@ -194,7 +194,10 @@ class Stuxnet():
 			elif other_position.kind == config.nous:
 				new_board.grid[other_position.coord] = (our_position.kind, our_position.number + other_position.number)
 				number_needed = our_position.number
-				delta_our = max(min(float(3*config.nb_of_h_positions_at_start/(current_board.x_max * current_board.y_max)),1),0) # test needed
+				if other_position.number > our_position.number:
+					delta_our = max(min(float(3*config.nb_of_h_positions_at_start/(current_board.x_max * current_board.y_max)),1),0) # test needed
+				else:
+					delta_our = 0
 			else:
 				number_needed = 0
 				print "'number_needed = 0' -> That should not happen :/"

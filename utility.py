@@ -406,8 +406,10 @@ class Board():
         # Anti-suicide fix :)
         if self.our_number() == 0:
             return -k
+
+        # Estocade fix
         if self.ennemy_number() == 0:
-            return k
+            return 10*k
         # - 20*self.human_number()
 
         return (k \
