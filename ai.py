@@ -200,7 +200,7 @@ class Stuxnet():
 			elif other_position.kind == config.nous:
 				new_board.grid[other_position.coord] = (our_position.kind, our_position.number + other_position.number)
 				number_needed = our_position.number
-				delta_our = 1.0
+				delta_our = max(min(float(3*config.nb_of_h_positions_at_start/(current_board.x_max * current_board.y_max)),1),0) # test needed
 			else:
 				number_needed = 0
 				print "'number_needed = 0' -> That should not happen :/"
@@ -248,11 +248,12 @@ class Stuxnet():
 				for our_other_position in our_other_positions:
 					if computeMinDistance(position,our_other_position) < dist:
 						dist = computeMinDistance(position,our_other_position)
-				escape_scope[position].append(100.0/dist) #to sort in te right order, see below
+				escape_scope[position].append(100.0/(1+dist)) #to sort in te right order, see below
 
-			# Compute escape position by sorting escape_scope by ennemy_distance and then by friend_distance (dic is flattened in the process)
-			escape_coord = sorted(([k]+v for k,v in escape_scope.iteritems()), key=itemgetter(1,2), reverse=True)[0][0] # sorted -> [(x,y),ennemy_distance, friend_distance] sorted by ennemy_distance and then by 100/friend_distance, from biggest to smallest
-																														# -> the escape coord selected is the furthest from the ennemy, the closest from a friend
+			# Compute escape position by sorting escape_scope by ennemy_distance and then by friend_distance (dic is flattened in the process) -> the escape coord selected is the furthest from the ennemy, the closest from a friend
+			escape_coord = sorted(([k]+v for k,v in escape_scope.iteritems()), key=itemgetter(1,2), reverse=True)[0][0] 
+			# sorted -> [(x,y),ennemy_distance, friend_distance] sorted by ennemy_distance and then by 100/(1+friend_distance), from biggest to smallest
+
 			# Add our team on the escape position on new_board
 			new_board.grid[escape_coord] = (our_position.kind, our_position.number)
 
