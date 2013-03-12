@@ -44,6 +44,7 @@ class Stuxnet():
 		self.mission_list = mission_list
 		self.game_graph =  game_graph
 		self.stack_to_evaluate = stack_to_evaluate
+		self.branch_number = 3
 
 
 
@@ -67,32 +68,18 @@ class Stuxnet():
 			Implementation of the min/max or alpha/beta :)
 			For now we make only one round (just find_best_moves actually)
 		'''
-		
-		# Add current element to the stack
-		self.stack_to_evaluate.append(self.game_graph[0])
-		while self.stack_to_evaluate != []:
-			# Get the next element to evaluate
-			# For the future we will probably have to implement a .pop() or similar
-			current_board = self.stack_to_evaluate[0]
+		current_board = self.game_graph[0]
 
-			'''For testing purpose, we have to "pop" the element IRL '''
-			self.stack_to_evaluate = []
-			# From the possibility (a board) compute the next smart possible moves
-			best_order = self.find_best_moves(current_board)
-
-			''' IRL we have to add the next elements to evaluate in the stack_to_evaluate '''
-		print "\nStuxnet::find_smart_move"
-		print "This is the sorted best order:"
-		#best_order = sorted(best_order, key=itemgetter(2), reverse=True)
-		#print "-"*50
-		#print "-"*50
-		#for order in best_order:
-		#	print "ordre: " + str(order[1]) +", score: " + str(order[2])
-		#print "-"*50
-		#print "-"*50
-		next_order = self.select_best_move(best_order)
-		smart_order = self.smart_move_filter(next_order, current_board)
-		return smart_order
+		# Next orders [[order_to_send, target_board],[order, target_board],...]
+		next_orders = self.find_best_moves(current_board)
+		print "find_smart_move - current_board", current_board
+		print "find_smart_move - next_orders", next_orders
+		smart_results = []
+		for next_order in next_orders:
+			smart_order = self.smart_move_filter(next_order[0], current_board)
+			smart_results.append([next_order[1], smart_order])
+		# [[target_board, order_to_send],[target_board, order_to_send],...]
+		return smart_results
 
 
 
@@ -134,9 +121,16 @@ class Stuxnet():
 		# Sort the list based on the score
 		alternatives = sorted(alternatives, key=itemgetter(2), reverse=True)
 		alternatives = alternatives_same_target_clean(alternatives)
-		order = self.generate_move(alternatives, current_board)
-		order_to_send = self.generate_order_format(order)
-		return order_to_send
+		orders = self.generate_move(alternatives, current_board)
+		print 'find_best_moves - orders', orders
+		result = []
+		for order in orders:
+			order_to_send = self.generate_order_format(order)
+			target_board = self.generate_target_board(order, current_board)
+			result.append([order_to_send, target_board])
+			print 'find_best_moves - order_to_send', order_to_send
+			print 'find_best_moves - target_board', target_board
+		return result
 
 
 
@@ -279,15 +273,46 @@ class Stuxnet():
 
 
 
-	def generate_move(self, alternatives, current_board):
+	def generate_move(self, alternatives_entry, current_board):
 		'''
-			From a list of alternatives (e.g. possible orders), find the best compliant one:
+			From a list of alternatives (e.g. possible orders), find the best compliant branches
+			Return array of orders
 		'''
 		#print "\n"+"#"*50+"\nStuxnet::generate_move"
 		#move_is_valid = False
-		order = self.smart_three_in_n(alternatives, current_board)
+
+		# Just keep the alternatives with the highest score
+		alternatives = alternatives_entry[:10]
+		coord_considered = []
+		for alternative in alternatives:
+			if (alternative[1][2], alternative[1][3]) in coord_considered:
+				pass
+			else:
+				coord_considered.append((alternative[1][2], alternative[1][3]))
+
+		# Be sure to have an alternative for each one of our group
+		for our_position in current_board.our_positions():
+			if our_position.coord in coord_considered:
+				pass
+			else:				
+				for alternative in alternatives_entry[10:]:
+					if our_position.coord == (alternative[1][2], alternative[1][3]):
+						coord_considered.append((alternative[1][2], alternative[1][3]))
+						alternatives.append(alternative)
+		print "alternatives all coord there?", alternatives
+		
+		orders = []
+		for i in range(self.branch_number):
+			try:
+				order = self.smart_three_in_n(alternatives, current_board, i)
+				if order == []:
+					break
+				else:
+					orders.append(order)
+			except:
+				pass
 		#move_is_valid = self.is_order_valid(order, current_board)
-		return order
+		return orders
 
 
 
@@ -352,27 +377,25 @@ class Stuxnet():
 
 
 
-	def smart_three_in_n(self, alternatives, current_board):
+	def smart_three_in_n(self, alternatives, current_board, branch_number):
 		'''
 			Implementation of the function described by Edouard
 		'''
 		#print "\n"+"#"*50+"\nStuxnet::smart_three_in_n"
-		alternatives = alternatives[:10]
-		for alternative_1 in alternatives:
-			#print "alternative_1", alternative_1
-			if self.is_order_valid([alternative_1], current_board):
-				for alternative_2 in alternatives:
-					if alternative_2 != alternative_1:
-						#print "alternative_2", alternative_2
-						if self.is_order_valid([alternative_1, alternative_2], current_board):
-							for alternative_3 in alternatives:
-								#print "alternative_3", alternative_3
-								if alternative_2 != alternative_3 and alternative_3 != alternative_1:
-									if self.is_order_valid([alternative_1, alternative_2, alternative_3], current_board):
-										return [alternative_1, alternative_2, alternative_3]
-							return [alternative_1, alternative_2]
-				return [alternative_1]
-		return [alternatives[0]]
+		alternative_1 = alternatives[branch_number]
+		#print "alternative_1", alternative_1
+		if self.is_order_valid([alternative_1], current_board):
+			for alternative_2 in alternatives:
+				if alternative_2 != alternative_1:
+					#print "alternative_2", alternative_2
+					if self.is_order_valid([alternative_1, alternative_2], current_board):
+						for alternative_3 in alternatives:
+							#print "alternative_3", alternative_3
+							if alternative_2 != alternative_3 and alternative_3 != alternative_1:
+								if self.is_order_valid([alternative_1, alternative_2, alternative_3], current_board):
+									return [alternative_1, alternative_2, alternative_3]
+						return [alternative_1, alternative_2]
+			return [alternative_1]
 
 
 
@@ -413,7 +436,51 @@ class Stuxnet():
 		print "order_to_send", order_to_send
 		return order_to_send
 
+	def generate_target_board(self, alternatives, current_board):
+		'''
+			From the given alternatives, generate the target board (with the 1, 2 or 3 missions done)
+		'''
+		target_board = copy.deepcopy(current_board)
+		
+		for alternative in alternatives:
+			our_coord = (alternative[1][2], alternative[1][3])
+			our_kind = target_board.grid[our_coord][0]
+			our_number = target_board.grid[our_coord][1]
+			other_coord = alternative[3]
+			other_kind = alternative[4]
+			other_number = target_board.grid[other_coord][1]
 
+			if other_kind == config.eux:
+				if our_number >= other_number:
+					if our_number >= int(1.5 * other_number) + 1:
+						target_board.grid[other_coord] = (our_kind, our_number)
+					else:
+						target_board.grid[other_coord] = (our_kind, float((2.0/3)*our_number))
+				else:
+					if other_number >= 1.5 *our_number:
+						target_board.grid[other_coord] = (other_kind, other_number)
+					else:
+						target_board.grid[other_coord] = (other_kind, float(other_number - (2.0/3)*our_number))
+
+			elif other_kind == 'h':
+				if our_number >= other_number:
+					target_board.grid[other_coord] = (our_kind, our_number + other_number)
+				else:
+					# We will die
+					target_board.grid[other_coord] = (other_kind, other_number)
+
+			elif other_kind == config.nous:
+				# The merge is supposed to stay on the one with the highest number (not realistic I know)
+				if our_number <= other_number:
+					try:
+						target_board.grid[other_coord] = (our_kind, our_number + other_number)
+					except:
+						# If we are here it should mean that 2 groups of the same size chose to merge and we are retrying to change the position in the board
+						pass
+			else:
+				print "That should not happen :/"
+
+		return target_board
 
 	def smart_move_filter(self, mov, current_board):
 		"""
@@ -481,7 +548,7 @@ class Stuxnet():
 						try:
 							if current_board.grid[(x, y)][0] == config.eux and current_board.grid[(x, y)][1] >= (our_position.number + current_board.grid[move][1]):
 								ennemy_near = True
-								print "ennemy found and too numerous", x, y, current_board.grid[(x, y)][1]
+								#print "ennemy found and too numerous", x, y, current_board.grid[(x, y)][1]
 								break
 						except:
 							pass
