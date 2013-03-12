@@ -6,3 +6,4 @@ Xsize = 0
 Ysize = 0
 cst_heuri = 0
 address = ("127.0.0.1",5555)
+nb_of_h_positions_at_start = 0
