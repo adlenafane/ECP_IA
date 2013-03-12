@@ -44,7 +44,7 @@ class Client():
         self.s = socket.socket()
         self.s.connect(Adress)
 
-client = Client()
+client = Client(config.address)
 sock = client.s
 
 #Envoi du nom
@@ -166,7 +166,7 @@ while True:
             print element
 
         time.sleep(1)
-
+        
         send_order(sock, order)
         """
         send(sock, "MOV", 1,5,4,3,4,3)

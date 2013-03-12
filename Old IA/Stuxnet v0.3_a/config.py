@@ -5,3 +5,4 @@ eux = ''  #variable qui contiendra 'w' si on est des v ou 'v' si on est des w
 Xsize = 0
 Ysize = 0
 cst_heuri = 0
+address = Adress=("127.0.0.1",5555)
