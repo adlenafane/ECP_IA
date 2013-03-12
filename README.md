@@ -28,8 +28,11 @@ ToDo
 
 * élaguer les triplets d'alternatives considérées
 
+* Mettre le choix de l'IP dans un fichier externe (type xml ou txt) pour pouvoir exporter en txt tranquille
+
 * implémenter mission fuite
 
 * implémenter minimax
 
 * rapport 
+
