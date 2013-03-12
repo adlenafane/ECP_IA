@@ -44,7 +44,7 @@ class Client():
         self.s = socket.socket()
         self.s.connect(Adress)
 
-client = Client()
+client = Client(config.address)
 sock = client.s
 
 #Envoi du nom
