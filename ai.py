@@ -199,7 +199,7 @@ class Stuxnet():
 			elif other_position.kind == config.nous:
 				new_board.grid[other_position.coord] = (our_position.kind, our_position.number + other_position.number)
 				number_needed = our_position.number
-				delta_our = 0.0
+				delta_our = 1.0
 			else:
 				number_needed = 0
 				print "That should not happen :/"
