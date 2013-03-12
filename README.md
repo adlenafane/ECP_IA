@@ -22,6 +22,8 @@ ToDo
 
 * implémenter minimax
 
+* multiprocessing... =)
+
 * battle stuxnet - stuxnet avec différents coefs heuristiques pour fine tuning
 
 
