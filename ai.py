@@ -238,9 +238,9 @@ class Stuxnet():
 
 			# create list of friends' positions
 			our_other_positions=[position.coord for position in current_board.our_positions()]
-			print our_other_positions
+			#print our_other_positions
 			our_other_positions.remove(our_position.coord)
-			print our_other_positions
+			#print our_other_positions
 
 			# determine distance to closest friend and add it to escape scope
 			for position in escape_scope.keys():
