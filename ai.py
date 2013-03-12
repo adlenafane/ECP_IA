@@ -191,13 +191,16 @@ class Stuxnet():
 						delta_our = float(-our_position.number)
 				# We should send at least 1.5 time the number of ennemies
 				number_needed = int(1.5 * other_position.number) + 1
+			
+
 			elif other_position.kind == config.nous:
 				new_board.grid[other_position.coord] = (our_position.kind, our_position.number + other_position.number)
 				number_needed = our_position.number
 				if other_position.number > our_position.number:
 					delta_our = max(min(float(3*config.nb_of_h_positions_at_start/(current_board.x_max * current_board.y_max)),1),0) # test needed
 				else:
-					delta_our = 0
+					delta_our = 0.0
+
 			else:
 				number_needed = 0
 				print "'number_needed = 0' -> That should not happen :/"
@@ -256,9 +259,14 @@ class Stuxnet():
 
 			# set next order:
 			next_order = ['MOV', 1, our_position.coord[0], our_position.coord[1], our_position.number, escape_coord[0], escape_coord[1]]
-			
+			print "generated escape_coord", escape_coord
+			print "ennemy position: ", other_position.coord
 			# set delta_our
-			delta_our = 1.0  #to be checked !!!!!!!!!!!
+
+			if other_position.kind == config.eux:
+				delta_our = 1.0  #to be checked !!!!!!!!!!!
+			else:
+				delta_our = 0.0
 
 		else:
 			pass
