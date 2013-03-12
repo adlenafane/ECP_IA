@@ -109,8 +109,8 @@ class Stuxnet():
 		all_positions.extend(current_board.ennemy_positions())
 		alternatives = []
 
-		fmt="%11s%12s%10s%13s%13s%15s"
-		print fmt % ('coord_start', 'coord_goal', 'distance', 'target_type', 'board_score', 'mission_score')
+		fmt="%11s%12s%10s%13s%13s%15s%14s"
+		print fmt % ('coord_start', 'coord_goal', 'distance', 'target_type', 'board_score', 'mission_score', 'mission_type')
 		# Let's go throught all possibilites !
 		for our_position in current_board.our_positions():
 			for other_position in all_positions:
@@ -127,7 +127,7 @@ class Stuxnet():
 									mission_score = float(target_board.score())*(computeMinDistance(our_position.coord, other_position.coord)**2)/ delta_our
 								else:
 									mission_score = float(target_board.score()*(computeMinDistance(our_position.coord, other_position.coord)**2))*abs(delta_our)
-							print fmt % (our_position.coord, other_position.coord, computeMinDistance(our_position.coord, other_position.coord), other_position.kind, round(target_board.score(),1), round(mission_score,1))
+							print fmt % (our_position.coord, other_position.coord, computeMinDistance(our_position.coord, other_position.coord), other_position.kind, round(target_board.score(),1), round(mission_score,1),mission)
 							alternatives.append((target_board, next_order, mission_score,other_position.coord,other_position.kind))
 		print "-"*120
 
@@ -213,14 +213,54 @@ class Stuxnet():
 				next_coord_optimized = self.optimize_next_move(current_board, our_position, other_position, next_coord)
 				next_order = ['MOV', 1, our_position.coord[0], our_position.coord[1], number_sent, next_coord_optimized[0], next_coord_optimized[1]]
 		
+		
+
 		elif mission == 'escape' : # maybe add 'and self.our_number() > ennemies around' 
 			# Remove our position from the board
 			del new_board.grid[our_position.coord]
 
-			# Add our team on the escape position
+			# Compute the 8 possible positions minus out-of-board positions
+			escape_scope = {}
+			x_range=[i for i in range(config.Xsize)]
+			y_range=[i for i in range(config.Ysize)]
+			if (our_position.x-1) in x_range and (our_position.y-1) in y_range : escape_scope[(our_position.x-1,our_position.y-1)] = []
+			if (our_position.x) in x_range and (our_position.y-1) in y_range : escape_scope[(our_position.x,our_position.y-1)]= []
+			if (our_position.x+1) in x_range and (our_position.y-1) in y_range : escape_scope[(our_position.x+1,our_position.y-1)]= []
+			if (our_position.x+1) in x_range and (our_position.y) in y_range : escape_scope[(our_position.x+1,our_position.y)]= []
+			if (our_position.x+1) in x_range and (our_position.y+1) in y_range : escape_scope[(our_position.x+1,our_position.y+1)]= []
+			if (our_position.x) in x_range and (our_position.y+1) in y_range : escape_scope[(our_position.x,our_position.y+1)]= []
+			if (our_position.x-1) in x_range and (our_position.y+1) in y_range : escape_scope[(our_position.x-1,our_position.y+1)]= []
+			if (our_position.x-1) in x_range and (our_position.y) in y_range : escape_scope[(our_position.x-1,our_position.y)]= []
 
+			# add distance to ennemy 
+			for position in escape_scope.keys():
+				escape_scope[position].append(computeMinDistance(position, other_position.coord))
+
+			# create list of friends' positions
+			our_other_positions=[position.coord for position in current_board.our_positions()]
+			print our_other_positions
+			our_other_positions.remove(our_position.coord)
+			print our_other_positions
+
+			# determine distance to closest friend and add it to escape scope
+			for position in escape_scope.keys():
+				dist = float('inf')
+				for our_other_position in our_other_positions:
+					if computeMinDistance(position,our_other_position) < dist:
+						dist = computeMinDistance(position,our_other_position)
+				escape_scope[position].append(dist)
+
+			# Compute escape position by sorting escape_scope by ennemy_distance and then by friend_distance (dic is flattened in the process)
+			escape_coord = sorted(([k]+v for k,v in escape_scope.iteritems()), key=itemgetter(1,2))[0][0] # sorted -> [(x,y),ennemy_distance, friend_distance] sorted by ennemy_distance and then by friend_distance
+
+			# Add our team on the escape position on new_board
+			new_board.grid[escape_coord] = (our_position.kind, our_position.number)
+
+			# set next order:
+			next_order = ['MOV', 1, our_position.coord[0], our_position.coord[1], our_position.number, escape_coord[0], escape_coord[1]]
 			
-
+			# set delta_our
+			delta_our = 1.0  #to be checked !!!!!!!!!!!
 
 		else:
 			pass
@@ -426,17 +466,17 @@ class Stuxnet():
 		#print "\n"+"#"*50+"\nStuxnet::optimize_next_move"
 		best_coord = next_coord
 		possible_move = self.get_possible_move(our_position, other_position)
-		print "possible_move", possible_move
+		#print "possible_move", possible_move
 		for move in possible_move:
-			print "move", move
+			#print "move", move
 			try:
 				# If there is human on this cell, we should kill them!
 				if current_board.grid[move][0] == 'h' and current_board.grid[move][1]<=our_position.number:
 					# However it ennemies are near and too numerous, maybe we should stay away...
-					print "human found!"
+					#print "human found!"
 					ennemy_near = False
 					for x,y in [(move[0]+i, move[1]+j) for i in (-1,0,1) for j in (-1,0,1) if i != 0 or j != 0]:
-						print "checking", x, y
+						#print "checking", x, y
 						try:
 							if current_board.grid[(x, y)][0] == config.eux and current_board.grid[(x, y)][1] >= (our_position.number + current_board.grid[move][1]):
 								ennemy_near = True
