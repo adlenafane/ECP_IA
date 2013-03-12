@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Map Rows="10" Columns="11">
+  <Humans X="0" Y="0" Count="1"/>
+  <Humans X="0" Y="3" Count="1"/>
+  <Humans X="0" Y="4" Count="1"/>
+  <Humans X="0" Y="5" Count="1"/>
+  <Humans X="0" Y="6" Count="1"/>
+  <Humans X="0" Y="9" Count="1"/>
+
+  <Humans X="1" Y="1" Count="1"/>
+  <Humans X="1" Y="8" Count="1"/>
+
+  <Humans X="2" Y="2" Count="1"/>
+  <Humans X="2" Y="3" Count="1"/>
+  <Humans X="2" Y="4" Count="1"/>
+  <Humans X="2" Y="5" Count="1"/>
+  <Humans X="2" Y="6" Count="1"/>
+  <Humans X="2" Y="7" Count="1"/>
+
+  <Humans X="3" Y="2" Count="1"/>
+  <Humans X="3" Y="7" Count="1"/>
+
+  <Humans X="4" Y="2" Count="1"/>
+  <Humans X="4" Y="7" Count="1"/>
+
+  <Humans X="5" Y="2" Count="1"/>
+  <Humans X="5" Y="7" Count="1"/>
+
+  <Humans X="6" Y="2" Count="1"/>
+  <Humans X="6" Y="7" Count="1"/>
+
+  <Humans X="7" Y="2" Count="1"/>
+  <Humans X="7" Y="7" Count="1"/>
+
+  <Humans X="8" Y="2" Count="1"/>
+  <Humans X="8" Y="3" Count="1"/>
+  <Humans X="8" Y="4" Count="1"/>
+  <Humans X="8" Y="5" Count="1"/>
+  <Humans X="8" Y="6" Count="1"/>
+  <Humans X="8" Y="7" Count="1"/>
+
+
+  <Humans X="10" Y="0" Count="1"/>
+  <Humans X="10" Y="2" Count="1"/>
+  <Humans X="10" Y="4" Count="1"/>
+  <Humans X="10" Y="5" Count="1"/>
+  <Humans X="10" Y="7" Count="1"/>
+  <Humans X="10" Y="9" Count="1"/>
+
+  <Werewolves X="5" Y="4" Count="15"/>
+  <Vampires X="5" Y="5" Count="15"/>
+</Map>
