@@ -6,8 +6,8 @@ import time
 from pprint import pprint
 from threading import Timer
 import config
-import ai0_8 as ai
-from conductor0_8 import Conductor
+import ai as ai
+from conductor import Conductor
 from utility import Board
 
 old_stdout = sys.stdout
