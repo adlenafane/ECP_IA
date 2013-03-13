@@ -2,6 +2,17 @@
 import config
 from random import choice
 import math
+from Stuxnet0_8 import send_order
+
+def return_best_order(sock, conductor):
+    best_move = conductor.best_order
+    print "minmax return", best_move
+    order = best_move[1]
+    print "order"
+
+    send_order(sock, order)
+    config.nous = config.nous_fixe
+    config.eux = config.eux_fixe
 
 def computeMinDistance(coord_1, coord_2):
     """
@@ -178,7 +189,7 @@ def randomPossibleNextCoord(coord_start):
 def go_attack_ennemies(any_board, position):
     """
 
-    """ 
+    """
 
 class VectorPosition():
     def __init__(self, kind, coord, number):
@@ -433,15 +444,6 @@ class Board():
         for human_position in human_positions:
             for our_position in our_positions:
                 human_targets.append((human_position.coord,human_position.number,computeMinDistance(human_positions[0],our_position.coord),our_position.number))
-
-    def print_board(self):
-        print "##### Board #####"
-        print 'grid', self.grid
-        print 'self.x_max', self.x_max
-        print 'self.y_max', self.y_max
-        print 'self.our_number()', self.our_number()
-        print 'self.ennemy_number()', self.ennemy_number()
-        print '#################'
 
 
 def main():
