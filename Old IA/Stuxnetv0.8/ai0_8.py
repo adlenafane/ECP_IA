@@ -1,4 +1,4 @@
-from utility import findNextMove, Board, computeMinDistance, VectorPosition
+from utility0_8 import findNextMove, Board, computeMinDistance, VectorPosition
 import config
 import copy
 from operator import itemgetter

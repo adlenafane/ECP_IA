@@ -80,7 +80,13 @@ class Conductor():
 			# Priority Queue is ranked in normal order of the score
 			if self.next_level != []:
 				self.next_level = sorted(self.next_level, key=itemgetter(0), reverse=True)
-				print "minmax_smart - next_level", self.next_level
+				print "\nminmax_smart - next_level", self.next_level
+				for element in self.next_level:
+					print '\nPossibility 1'
+					print 'score', element[0], '\n'
+					element[1].print_board()
+					print '\n order', element[2]
+
 				self.best_move = self.next_level[0][1]
 				# If for a weird reason, the best_move found is void, do not update the config!!
 				if self.next_level[0][1] != []:
@@ -150,3 +156,77 @@ class Conductor():
 		if best_move == None:
 			return [current_board.score(), current_move, 0]
 		return best_score, best_move, needed_depth+1
+
+	def IDDFS(self, current_board, player = 1):
+		depth = 0
+		current_move = (current_board.score(), current_board, [])
+		while config.timer_ok:
+			move = self.alphabeta(player, current_move, depth, first_iteration=True)
+			print 'IDDFS - best_move', move
+			if move != []:
+				config.best_move = move
+			depth+=1
+
+	def alphabeta(self, player, current_move, depth, first_iteration = False, alpha = -float('inf'), beta = float('inf')):
+		'''
+			move = [score, board, next_order]
+			find_smart_move return [board, next_order]
+		'''
+		if (depth == 0):
+			print 'depht 0 - move', current_move
+			return current_move
+
+		# Handle our first move to have good first orders
+		if first_iteration:
+			print 'first_iteration'
+			current_board = current_move[1]
+			print 'alphabeta - first_iteration - current board', current_board
+			computed_move = []
+			self.our_ia.update_game_graph(current_board)
+			next_moves = self.our_ia.find_smart_move()
+
+			# print "next_moves", next_moves
+			for move in next_moves:
+				board = move[0]
+				print 'alphabeta move', move
+				computed_move = self.alphabeta(-player, (board.score(), board, move[1]), depth-1, False, alpha, beta)
+			return computed_move
+
+		# For depth > 0
+		print 'alphabeta - current move', current_move
+		current_board = current_move[1]
+		print 'alphabeta - current board', current_board
+		# Get the next moves
+		next_moves = []
+		if  player == 1 and config.timer_ok:
+			computed_move = []
+			self.our_ia.update_game_graph(current_board)
+			next_moves = self.our_ia.find_smart_move()
+
+			# print "next_moves", next_moves
+			for move in next_moves:
+				board = move[0]
+				# Keep the current_move[2] means keep the order, which should be the first we have to make to get there
+				computed_move = self.alphabeta(-player, (board.score(), board, current_move[2]), depth-1, False, alpha, beta)
+				alpha = max(alpha, computed_move[0])
+				if beta <= alpha:
+					break
+			return computed_move
+
+		elif config.timer_ok:
+			computed_move = []
+			self.other_ia.update_game_graph(current_board)
+			next_moves = self.other_ia.find_smart_move()
+
+			# print "next_moves", next_moves
+			for move in next_moves:
+				board = move[0]
+				computed_move = self.alphabeta(player, (board.score(), board, current_move[2]), depth-1, False, alpha, beta)
+				beta = min(beta, computed_move[0])
+				if beta <= alpha:
+					break
+			return computed_move
+		else:
+			# time is out
+			print 'time is out'	 
+			return config.best_move

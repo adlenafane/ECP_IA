@@ -26,10 +26,10 @@ ToDo
 
 * battle stuxnet - stuxnet avec différents coefs heuristiques pour fine tuning
 
-
+* Avoir la possibilité d'enlever les logs (1.2M de lignes ça commence à faire beaucoup et ça doit ralentir)
 
 * rapport 
 
 secondaire:
 * élaguer les triplets d'alternatives considérées
-* Mettre le choix de l'IP dans un fichier externe (type xml ou txt) pour pouvoir exporter en txt tranquille
+* Mettre le choix de l'IP dans un fichier externe (type xml ou txt) pour pouvoir exporter en exe tranquille

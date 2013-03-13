@@ -11,3 +11,4 @@ address = ("127.0.0.1",5555)
 nb_of_h_positions_at_start = 0
 dominance= 0   # variable needed to know wich sound to play at the end of the game
 best_move = []
+timer_ok = True
