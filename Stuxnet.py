@@ -110,6 +110,7 @@ while True:
         
     elif order == "HUM":
         n = struct.unpack('=B', sock.recv(1))[0]
+        config.nb_of_h_positions_at_start = n
         print "reception de %i positions d'humains:" %n
         maisons = []
         for i in range(n):
