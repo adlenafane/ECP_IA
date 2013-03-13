@@ -407,7 +407,7 @@ class Board():
 
         # Estocade fix
         if self.ennemy_number() == 0:
-            return 5*k
+            return 10*k
         # - 20*self.human_number()
 
         return (k \
