@@ -52,10 +52,11 @@ def send_order(sock, messages):
             print("Couldn't send message: ", message)
 
 def return_best_order(sock):
+    config.timer_ok = False
     best_move = config.best_move
     print "minmax return", best_move
     if best_move != []:
-        order = best_move[1]
+        order = best_move[2]
         print "order"
         if order != []:
             send_order(sock, order)
@@ -183,7 +184,9 @@ while True:
         
         our_timer=Timer(4.0, return_best_order, [sock])
         our_timer.start()
-        conductor.minmax_smart(1, current_board)
+        config.timer_ok = True
+        conductor.IDDFS(current_board, 1)
+        #conductor.minmax_smart(1, current_board)
         
         config.nous = config.nous_fixe
         config.eux = config.eux_fixe
