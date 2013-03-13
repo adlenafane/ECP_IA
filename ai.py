@@ -1,24 +1,7 @@
-from utility import findNextMove, Board, computeMinDistance
+from utility import findNextMove, Board, computeMinDistance, VectorPosition
 import config
 import copy
 from operator import itemgetter
-
-
-def alternatives_same_target_clean(input_alternatives):
-	"""
-	(target_board, next_order, mission_score,other_position.coord)
-	"""
-	alternatives = input_alternatives
-	idx_to_del=[]
-
-	for i in range(len(alternatives)):
-		target = alternatives[i][3]
-		print "alternatives[i][3]: ", target
-		for j in range(i+1,len(alternatives)):
-			if alternatives[j][3]==target and alternatives[j][4]!=config.nous: 
-				alternatives.pop(j) #the alternative with same target and worse score of another alternative is removed from the list of alternatives if it's not a merge
-				return alternatives_same_target_clean(alternatives)
-	return alternatives
 
 
 """	alternatives = input_alternatives
@@ -39,13 +22,13 @@ def alternatives_same_target_clean(input_alternatives):
 
 class Stuxnet():
 	""" Class to handle our AI"""
-	def __init__(self, mission_list = ['attack','escape'], game_graph = [], stack_to_evaluate = []):
+	def __init__(self, our_kind = '', other_kind = '', mission_list = ['attack','escape'], game_graph = []):
 		#print "\n"+"#"*50+"\nStuxnet::__init__"
 		self.mission_list = mission_list
 		self.game_graph =  game_graph
-		self.stack_to_evaluate = stack_to_evaluate
 		self.branch_number = 3
-
+		self.our_kind = our_kind
+		self.other_kind = other_kind
 
 
 	def update_game_graph(self, board):
@@ -120,7 +103,7 @@ class Stuxnet():
 
 		# Sort the list based on the score
 		alternatives = sorted(alternatives, key=itemgetter(2), reverse=True)
-		alternatives = alternatives_same_target_clean(alternatives)
+		alternatives = self.alternatives_same_target_clean(alternatives)
 		orders = self.generate_move(alternatives, current_board)
 		print 'find_best_moves - orders', orders
 		result = []
@@ -139,7 +122,7 @@ class Stuxnet():
 			From the kind of the other position evaluate if the mission makes sense
 			For instance 'e', attack will return True but 'o', attack will return False
 		'''
-		if mission == 'escape' and other_position_kind != config.eux :
+		if mission == 'escape' and other_position_kind != self.other_kind :
 			return False
 		#print "\n"+"#"*50+"\nStuxnet::is_mission_compliant"
 		return True
@@ -173,7 +156,7 @@ class Stuxnet():
 					delta_our = float(-our_position.number)
 				# Send the same number of human is enough
 				number_needed = int(other_position.number)
-			elif other_position.kind == config.eux:
+			elif other_position.kind == self.other_kind:
 				if our_position.number >= other_position.number:
 					if our_position.number >= int(1.5 * other_position.number) + 1:
 						# Use the probability given by the pdf to compute the estimate survivors
@@ -191,9 +174,8 @@ class Stuxnet():
 						delta_our = float(-our_position.number)
 				# We should send at least 1.5 time the number of ennemies
 				number_needed = int(1.5 * other_position.number) + 1
-			
 
-			elif other_position.kind == config.nous:
+			elif other_position.kind == self.our_kind:
 				new_board.grid[other_position.coord] = (our_position.kind, our_position.number + other_position.number)
 				number_needed = our_position.number
 				if other_position.number > our_position.number:
@@ -461,7 +443,7 @@ class Stuxnet():
 			other_kind = alternative[4]
 			other_number = target_board.grid[other_coord][1]
 
-			if other_kind == config.eux:
+			if other_kind == self.other_kind:
 				if our_number >= other_number:
 					if our_number >= int(1.5 * other_number) + 1:
 						target_board.grid[other_coord] = (our_kind, our_number)
@@ -480,7 +462,7 @@ class Stuxnet():
 					# We will die
 					target_board.grid[other_coord] = (other_kind, other_number)
 
-			elif other_kind == config.nous:
+			elif other_kind == self.our_kind:
 				# The merge is supposed to stay on the one with the highest number (not realistic I know)
 				if our_number <= other_number:
 					try:
@@ -557,7 +539,7 @@ class Stuxnet():
 					for x,y in [(move[0]+i, move[1]+j) for i in (-1,0,1) for j in (-1,0,1) if i != 0 or j != 0]:
 						#print "checking", x, y
 						try:
-							if current_board.grid[(x, y)][0] == config.eux and current_board.grid[(x, y)][1] >= (our_position.number + current_board.grid[move][1]):
+							if current_board.grid[(x, y)][0] == self.other_kind and current_board.grid[(x, y)][1] >= (our_position.number + current_board.grid[move][1]):
 								ennemy_near = True
 								#print "ennemy found and too numerous", x, y, current_board.grid[(x, y)][1]
 								break
@@ -569,7 +551,7 @@ class Stuxnet():
 				ennemy_near = False
 				for x,y in [(move[0]+i, move[1]+j) for i in (-1,0,1) for j in (-1,0,1) if i != 0 or j != 0]:
 					try:
-						if current_board.grid[(x, y)][0] == config.eux and current_board.grid[(x, y)][1] >= our_position.number:
+						if current_board.grid[(x, y)][0] == self.other_kind and current_board.grid[(x, y)][1] >= our_position.number:
 							ennemy_near = True
 							break
 					except:
@@ -609,8 +591,24 @@ class Stuxnet():
 				possible_move = [(our_x-1, our_y-1), (our_x-1, our_y), (our_x-1, our_y+1)]
 		# We have to move on the diagonal
 		else:
+			# Ennemy is on diagonal top left / bottom right!
+			if our_y-our_x == other_y-other_x:
+				# Ennemy is on the left on top left
+				if our_x > other_x:
+					possible_move = [(our_x-1, our_y-1)]
+				# Ennemy is on the right on bottom right
+				else:
+					possible_move = [(our_x+1, our_y+1)]
+			# Ennemy is on diagonal bottom left / top right!
+			elif our_y - (config.Xsize-our_x) == other_y - (config.Xsize - other_x):
+				# Ennemy is on the left on bottom left
+				if our_x > other_x:
+					possible_move = [(our_x-1, our_y+1)]
+				# Ennemy is on the right on top right
+				else:
+					possible_move = [(our_x+1, our_y-1)]
 			# Other position is bottom left
-			if our_y-our_x < other_y-other_x:
+			elif our_y-our_x < other_y-other_x:
 				# Other position is bottom right
 				# --> South
 				if our_y - (config.Xsize-our_x) < other_y - (config.Xsize - other_x):
@@ -629,6 +627,7 @@ class Stuxnet():
 					# Go South West West
 					else:
 						possible_move = [(our_x-1, our_y), (our_x-1, our_y+1)]
+			
 			# Other position is top right
 			else:
 				# Other position is bottom right
@@ -651,9 +650,26 @@ class Stuxnet():
 						possible_move = [(our_x, our_y-1), (our_x+1,our_y-1)]
 		valid_possible_move = []
 		for move in possible_move:
+			print "move", move
 			if move[0]>=0 and move[1]>=0 and move[0]<config.Xsize and move[1]<config.Ysize:
 				valid_possible_move.append(move)
 		return valid_possible_move
+
+
+	def alternatives_same_target_clean(self, input_alternatives):
+		"""
+		(target_board, next_order, mission_score,other_position.coord)
+		"""
+		alternatives = input_alternatives
+
+		for i in range(len(alternatives)):
+			target = alternatives[i][3]
+			print "alternatives[i][3]: ", target
+			for j in range(i+1,len(alternatives)):
+				if alternatives[j][3]==target and alternatives[j][4]!=self.our_kind: 
+					alternatives.pop(j) #the alternative with same target and worse score of another alternative is removed from the list of alternatives if it's not a merge
+					return self.alternatives_same_target_clean(alternatives)
+		return alternatives
 
 def main():
 	"""
@@ -675,9 +691,11 @@ def main():
 
 	config.nous = 'v'
 	config.eux = 'w'
+	config.Xsize = 100
+	config.Ysize = 100
 
 	board = Board(grid,10,10)
-	stuxnet = Stuxnet()
+	stuxnet = Stuxnet('v', 'w')
 	#stuxnet.update_game_graph(board)
 	#pprint.pprint(stuxnet.find_smart_move())
 	print "test mov 1"
@@ -688,7 +706,26 @@ def main():
 	print stuxnet.smart_move_filter(['MOV', 2, 2,2,1,3,2,2,2,1,2,3], board)
 	print "\n"
 
+	our_position = VectorPosition('v', (4,4), 100)
+	# other_position = VectorPosition('w', (2,2), 1)
+	# other_position = VectorPosition('w', (3,2), 1)
+	# other_position = VectorPosition('w', (4,2), 1)
+	# other_position = VectorPosition('w', (5,2), 1)
+	# other_position = VectorPosition('w', (6,2), 1)
+	# other_position = VectorPosition('w', (6,3), 1)
+	# other_position = VectorPosition('w', (6,4), 1)
+	# other_position = VectorPosition('w', (6,5), 1)
+	# other_position = VectorPosition('w', (6,6), 1)
+	# other_position = VectorPosition('w', (5,6), 1)
+	# other_position = VectorPosition('w', (4,6), 1)
+	# other_position = VectorPosition('w', (3,6), 1)
+	# other_position = VectorPosition('w', (2,6), 1)
+	# other_position = VectorPosition('w', (2,5), 1)
+	# other_position = VectorPosition('w', (2,4), 1)
+	other_position = VectorPosition('w', (2,3), 1)
+	
 
+	print 'get_possible_move', stuxnet.get_possible_move(our_position, other_position)
 
 if __name__=="__main__":
     main()
