@@ -3,6 +3,10 @@ import config
 import copy
 from operator import itemgetter
 
+'''
+alternatives.append((target_board, next_order, mission_score,other_position.coord,other_position.kind))
+next_order = ['MOV', 1, our_position.coord[0], our_position.coord[1], number_sent, next_coord_optimized[0], next_coord_optimized[1]]
+'''
 
 class Stuxnet():
 	""" Class to handle our AI"""
@@ -97,6 +101,7 @@ class Stuxnet():
 		for order in orders:
 			order_to_send = self.generate_order_format(order)
 			target_board = self.generate_target_board(order, current_board)
+			#target_board = self.generate_next_board(order, current_board)
 			result.append([order_to_send, target_board])
 			print 'find_best_moves - order_to_send', order_to_send
 			print 'find_best_moves - target_board', target_board
@@ -461,6 +466,64 @@ class Stuxnet():
 				print "That should not happen :/"
 
 		return target_board
+
+	def generate_next_board(self, alternatives, current_board):
+		'''
+			Generate the board with the next move made
+			alternatives.append((target_board, next_order, mission_score,other_position.coord,other_position.kind))
+			next_order = ['MOV', 1, our_position.coord[0], our_position.coord[1], number_sent, next_coord_optimized[0], next_coord_optimized[1]]
+		'''
+		next_board = copy.deepcopy(current_board)
+
+		for alternative in alternatives:
+			next_order = alternative[1]
+			next_order = self.smart_move_filter(next_order, current_board)
+			our_coord = (next_order[2], next_order[3])
+			next_coord = (next_order[5], next_order[6])
+			our_kind = self.our_kind
+			our_number = next_order[4]
+
+			try:
+				next_cell = next_board.grid[next_coord]
+				# Remove our position from the board
+				del next_board.grid[our_coord]
+
+				other_coord = next_coord
+				other_kind = next_cell[0]
+				other_number = next_cell[1]
+
+				if other_kind == self.other_kind:
+					if our_number >= other_number:
+						if our_number >= int(1.5 * other_number) + 1:
+							next_board.grid[other_coord] = (our_kind, our_number)
+						else:
+							next_board.grid[other_coord] = (our_kind, float((2.0/3)*our_number))
+					else:
+						if other_number >= 1.5 *our_number:
+							next_board.grid[other_coord] = (other_kind, other_number)
+						else:
+							next_board.grid[other_coord] = (other_kind, float(other_number - (2.0/3)*our_number))
+
+				elif other_kind == 'h':
+					if our_number >= other_number:
+						next_board.grid[other_coord] = (our_kind, our_number + other_number)
+					else:
+						# We will die
+						next_board.grid[other_coord] = (other_kind, other_number)
+
+				elif other_kind == self.our_kind:
+					# The merge is supposed to stay on the one with the highest number (not realistic I know)
+					if our_number <= other_number:
+						try:
+							next_board.grid[other_coord] = (our_kind, our_number + other_number)
+						except:
+							# If we are here it should mean that 2 groups of the same size chose to merge and we are retrying to change the position in the board
+							pass
+			except:
+				# The target cell is void
+				del next_board.grid[our_coord]
+				next_board.grid[next_coord] = (our_kind, our_number)
+		return next_board
 
 	def smart_move_filter(self, mov, current_board):
 		"""
