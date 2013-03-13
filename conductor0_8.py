@@ -165,6 +165,7 @@ class Conductor():
 			print 'IDDFS - best_move', move
 			if move != []:
 				config.best_move = move
+			print 'IDDFS - depth', depth
 			depth+=1
 
 	def alphabeta(self, player, current_move, depth, first_iteration = False, alpha = -float('inf'), beta = float('inf')):
@@ -209,6 +210,7 @@ class Conductor():
 				# Keep the current_move[2] means keep the order, which should be the first we have to make to get there
 				computed_move = self.alphabeta(-player, (board.score(), board, current_move[2]), depth-1, False, alpha, beta)
 				alpha = max(alpha, computed_move[0])
+				print 'alphabeta - alpha', alpha
 				if beta <= alpha:
 					break
 			return computed_move
@@ -223,6 +225,7 @@ class Conductor():
 				board = move[0]
 				computed_move = self.alphabeta(player, (board.score(), board, current_move[2]), depth-1, False, alpha, beta)
 				beta = min(beta, computed_move[0])
+				print 'alphabeta - beta', beta
 				if beta <= alpha:
 					break
 			return computed_move
