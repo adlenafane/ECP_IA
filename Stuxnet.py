@@ -9,6 +9,7 @@ import config
 import ai as ai
 from conductor import Conductor
 from utility import Board
+import winsound
 
 old_stdout = sys.stdout
 
@@ -60,6 +61,9 @@ def return_best_order(sock):
             send_order(sock, order)
     config.nous = config.nous_fixe
     config.eux = config.eux_fixe
+
+def beep(sound):
+    winsound.PlaySound('sound/%s.wav' % sound, winsound.SND_FILENAME)
 
 class Client():
     def __init__(self, Adress=("127.0.0.1",5555)):
@@ -163,6 +167,7 @@ while True:
         #pprint(config.board)
 
         current_board = Board(config.board, config.Xsize, config.Ysize)
+        config.dominance = 1 if current_board.our_number() > current_board.ennemy_number() else 0
 
         #print "our_positions"
         #pprint(current_board.our_positions())
@@ -236,6 +241,10 @@ while True:
 
 
     elif order == "END":
+        if config.dominance == 1:
+            beep('monsterkill')
+        else:
+            beep('holyshit')
         #ici on met fin a la partie en cours Reinitialisez votre modele
         break
 
