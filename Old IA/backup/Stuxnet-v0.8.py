@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
-import socket, struct
-from pprint import pprint
-import config
-import ai
-from utility import Board
+import socket
+import struct
 import sys
 import time
-from conductor0_7 import Conductor
+from pprint import pprint
+from threading import Timer
+import config
+import ai0_8 as ai
+from conductor0_8 import Conductor
+from utility import Board
 
 old_stdout = sys.stdout
 
-#log_file = open("./log/message"+str(int(round(time.time() * 1000)))+".log","w")
-log_file = open("./log/message.log","w")
+log_file = open("./log/message"+str(int(round(time.time() * 1000)))+".log","w")
+#log_file = open("./log/message.log","w")
 
 sys.stdout = log_file
 
@@ -40,6 +42,16 @@ def send_order(sock, messages):
         except:
             print("Couldn't send message: ", message)
 
+def return_best_order(sock, conductor):
+    best_move = conductor.best_order
+    print "minmax return", best_move
+    order = best_move[1]
+    print "order"
+
+    send_order(sock, order)
+    config.nous = config.nous_fixe
+    config.eux = config.eux_fixe
+
 class Client():
     def __init__(self, Adress=("127.0.0.1",5555)):
         self.s = socket.socket()
@@ -49,11 +61,10 @@ client = Client(config.address)
 sock = client.s
 
 #Envoi du nom
-groupname = "Stuxnet - v0_7" #mettez ici le nom de votre equipe
+groupname = "Stuxnet - v0_8" #mettez ici le nom de votre equipe
 send(sock, "NME", len(groupname), groupname)
 print data
 global home  #stock le tuple de coodonnees de notre maison. variable qui servira a identifier si on est des v ou des w
-global nous  #variable qui contiendra 'v' si on est des v ou 'w' si on est des w
 global Xsize
 global Ysize
 
@@ -153,27 +164,36 @@ while True:
         #print "ennemy_positions"
         #pprint(current_board.ennemy_positions())
 
-        stuxnet.update_game_graph(current_board)
+        # stuxnet.update_game_graph(current_board)
         
         #calculez votre coup
-        conductor = Conductor(stuxnet, stuxnet)
-        score, move, void = conductor.minmax(1, [current_board, []], 3)
-        print "minmax return", move
-        order = move[1]
+        stuxnet_2 = ai.Stuxnet()
+        stuxnet_2.our_kind = config.eux_fixe
+        stuxnet_2.other_kind = config.nous_fixe
 
-        #preparez la trame MOV ou ATK
-        #Par exemple: un ordre MOV qui fonctionne mais "ne respecte pas les regles" (je sais pas pk)
-        #arg: "MOV" est suivi du nombre de quintuplets de deplacement n, puis des n quintuplets: (Xdepart, Ydepart, nb de pers a deplacer, X arrivee, Y arrivee)
-        print "order"
-        for element in order:
-            print element
+        conductor = Conductor(stuxnet, stuxnet_2)
+        our_timer=Timer(9.0, return_best_order, [sock, conductor])
+        our_timer.start()
+        time.sleep(9.5)
+        # score, move, void = conductor.minmax(1, [current_board, []], 3)
+        
+        # best_move = conductor.minmax_smart(1, current_board)
+        # print "minmax return", best_move
+        # order = best_move[1]
 
-        time.sleep(1)
+        # #preparez la trame MOV ou ATK
+        # #Par exemple: un ordre MOV qui fonctionne mais "ne respecte pas les regles" (je sais pas pk)
+        # #arg: "MOV" est suivi du nombre de quintuplets de deplacement n, puis des n quintuplets: (Xdepart, Ydepart, nb de pers a deplacer, X arrivee, Y arrivee)
+        # print "order"
+        # for element in order:
+        #     print element
 
-        send_order(sock, order)
+        #send_order(sock, order)
         """
         send(sock, "MOV", 1,5,4,3,4,3)
         """
+        config.nous = config.nous_fixe
+        config.eux = config.eux_fixe
         #un ex d'ordre ATK qui fonctionne:
         #send(sock, "ATK",4,4) #arg: "ATK" suivi des coordonnées de la cellule cible
         print "#################### fin du UPD ###################"
@@ -207,10 +227,14 @@ while True:
                 print "je n'ai pas compris l'ordre MAP"
 
         config.nous = config.board[(home[0],home[1])] [0]  #enregistre 'v' ou 'w' dans la variable nous
+        config.nous_fixe = config.nous
         if config.nous == 'v':
             config.eux = 'w'
+            config.eux_fixe = config.eux
         else:
             config.eux = 'v'
+            config.eux_fixe = config.eux
+
         stuxnet.our_kind = config.nous
         stuxnet.other_kind = config.eux
         print "nous sommes de type: %s" %config.nous
@@ -249,5 +273,3 @@ sock.close()
 sys.stdout = old_stdout
 
 log_file.close()
-
-
