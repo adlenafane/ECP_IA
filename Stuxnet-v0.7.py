@@ -211,6 +211,8 @@ while True:
             config.eux = 'w'
         else:
             config.eux = 'v'
+        stuxnet.our_kind = config.nous
+        stuxnet.other_kind = config.eux
         print "nous sommes de type: %s" %config.nous
         pprint(config.board)
 
