@@ -194,7 +194,10 @@ class Conductor():
 				computed_move = self.alphabeta(-player, (board.score(), board, move[1]), depth-1, False, alpha, beta)
 				best_moves.append(computed_move)
 			print 'alphabeta - best_moves - first_iteration', best_moves
-			return sorted(best_moves, key=itemgetter(0), reverse=True)[0]
+			try:
+				return sorted(best_moves, key=itemgetter(0), reverse=True)[0]
+			except:
+				return []
 
 		# For depth > 0
 		print 'alphabeta - current move', current_move
