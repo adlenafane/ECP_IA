@@ -24,8 +24,8 @@ nb_tours = 0
 
 stuxnet = ai.Stuxnet()
 stuxnet_2 = ai.Stuxnet()
-stuxnet_2.our_kind = config.eux_fixe
-stuxnet_2.other_kind = config.nous_fixe
+# stuxnet_2.our_kind = config.eux_fixe
+# stuxnet_2.other_kind = config.nous_fixe
 
 conductor = Conductor(stuxnet, stuxnet_2)
 
@@ -60,8 +60,6 @@ def return_best_order(sock):
         print "order"
         if order != []:
             send_order(sock, order)
-    config.nous = config.nous_fixe
-    config.eux = config.eux_fixe
 
 def beep(sound):
     winsound.PlaySound('sound/%s.wav' % sound, winsound.SND_FILENAME)
@@ -188,8 +186,6 @@ while True:
         conductor.IDDFS(current_board, 1)
         #conductor.minmax_smart(1, current_board)
         
-        config.nous = config.nous_fixe
-        config.eux = config.eux_fixe
 
         print "#################### fin du UPD ###################"
         print "\n\n"
@@ -232,6 +228,7 @@ while True:
 
         stuxnet.our_kind = config.nous
         stuxnet.other_kind = config.eux
+
         print "nous sommes de type: %s" %config.nous
         pprint(config.board)
 
