@@ -368,7 +368,7 @@ class Board():
         k = config.cst_heuri
 
         #constante de domination
-        if self.our_number()>=self.ennemy_number():
+        if self.our_number()>self.ennemy_number():
             dominance=1
         else:
             dominance = 0
@@ -383,14 +383,14 @@ class Board():
         # - 20*self.human_number()
 
         return (k \
-            + 10*self.our_number() \
-            - 11*self.ennemy_number()  #ennemy kill is more valuable than our growth to prevent jumping on adjacent human when we have the occasion to kill ennemies\
-            - self.sum_min_distance_us_human_delta() \
-            + 2*self.sum_min_distance_us_ennemy_delta() \
-            + self.sum_min_distance_ennemy_human_delta() \
-            + dominance*5.0*1.0/(0.1+1.0/5*self.human_number())*self.our_number()/len(self.our_positions())  #encourage merge  \
-            + (1-dominance)*50.0*1.0/(0.1+1.0/5*self.human_number())*len(self.our_positions())/self.our_number())  #encourage small groups
-
+            + 20*self.our_number() \
+            - 21*self.ennemy_number() #ennemy kill is more valuable than our growth to prevent jumping on adjacent human when we have the occasion to kill ennemies\
+            - 20*self.sum_min_distance_us_human_delta() \
+            + 20*self.sum_min_distance_us_ennemy_delta() \
+            + 20*self.sum_min_distance_ennemy_human_delta() \
+            # + dominance*5.0*1.0/(0.1+1.0/5*self.human_number())*self.our_number()/len(self.our_positions())  #encourage merge  \
+            # + (1-dominance)*50.0*1.0/(0.1+1.0/5*self.human_number())*len(self.our_positions())/self.our_number()  #encourage small groups
+            )
 
 
 
