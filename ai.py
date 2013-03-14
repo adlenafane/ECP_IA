@@ -10,7 +10,7 @@ class Stuxnet():
 		#print "\n"+"#"*50+"\nStuxnet::__init__"
 		self.mission_list = mission_list
 		self.game_graph =  game_graph
-		self.branch_number = 10
+		self.branch_number = 3
 		self.our_kind = our_kind
 		self.other_kind = other_kind
 
@@ -46,7 +46,8 @@ class Stuxnet():
 		smart_results = []
 		for next_order in next_orders:
 			smart_order = self.smart_move_filter(next_order[0], current_board)
-			smart_results.append([next_order[1], smart_order])
+			target_board = self.generate_next_board(smart_order, current_board)
+			smart_results.append([target_board, smart_order])
 		# [[target_board, order_to_send],[target_board, order_to_send],...]
 		return smart_results
 
@@ -66,8 +67,8 @@ class Stuxnet():
 		all_positions.extend(current_board.ennemy_positions())
 		alternatives = []
 
-		#fmt="%11s%12s%10s%13s%13s%15s%14s"
-		#print fmt % ('coord_start', 'coord_goal', 'distance', 'target_type', 'board_score', 'mission_score', 'mission_type')
+		fmt="%11s%12s%10s%13s%13s%15s%14s"
+		print fmt % ('coord_start', 'coord_goal', 'distance', 'target_type', 'board_score', 'mission_score', 'mission_type')
 		# Let's go throught all possibilites !
 		for our_position in current_board.our_positions():
 			for other_position in all_positions:
@@ -84,7 +85,7 @@ class Stuxnet():
 									mission_score = float(target_board.score())*(computeMinDistance(our_position.coord, other_position.coord)**2)/ delta_our
 								else:
 									mission_score = float(target_board.score()*(computeMinDistance(our_position.coord, other_position.coord)**2))*abs(delta_our)
-							#print fmt % (our_position.coord, other_position.coord, computeMinDistance(our_position.coord, other_position.coord), other_position.kind, round(target_board.score(),1), round(mission_score,1),mission)
+							print fmt % (our_position.coord, other_position.coord, computeMinDistance(our_position.coord, other_position.coord), other_position.kind, round(target_board.score(),1), round(mission_score,1),mission)
 							alternatives.append((target_board, next_order, mission_score,other_position.coord,other_position.kind))
 		print "-"*120
 
@@ -145,7 +146,8 @@ class Stuxnet():
 				# Send the same number of human is enough
 				number_needed = int(other_position.number)
 			elif other_position.kind == self.other_kind:
-				if our_position.number >= other_position.number:
+				#Adlen change test
+				if our_position.number > other_position.number:
 					if our_position.number >= int(1.5 * other_position.number) + 1:
 						# Use the probability given by the pdf to compute the estimate survivors
 						new_board.grid[other_position.coord] = (our_position.kind, our_position.number)
@@ -166,10 +168,11 @@ class Stuxnet():
 			elif other_position.kind == self.our_kind:
 				new_board.grid[other_position.coord] = (our_position.kind, our_position.number + other_position.number)
 				number_needed = our_position.number
-				if other_position.number > our_position.number:
-					delta_our = max(min(float(3*config.nb_of_h_positions_at_start/(current_board.x_max * current_board.y_max)),1),0) # test needed
-				else:
-					delta_our = 0.0
+				delta_our = 1.0
+				# if other_position.number > our_position.number:
+				# 	delta_our = max(min(float(3*config.nb_of_h_positions_at_start/(current_board.x_max * current_board.y_max)),1),0) # test needed
+				# else:
+				# 	delta_our = 0.0
 
 			else:
 				number_needed = 0
@@ -463,62 +466,62 @@ class Stuxnet():
 
 		return target_board
 
-	def generate_next_board(self, alternatives, current_board):
+	def generate_next_board(self, alternative, current_board):
 		'''
 			Generate the board with the next move made
 			alternatives.append((target_board, next_order, mission_score,other_position.coord,other_position.kind))
 			next_order = ['MOV', 1, our_position.coord[0], our_position.coord[1], number_sent, next_coord_optimized[0], next_coord_optimized[1]]
 		'''
 		next_board = copy.deepcopy(current_board)
+		print 'generate_next_board - next_board', next_board.print_board()
+		print 'generate_next_board - alternatives', alternative
+		next_order = alternative
+		our_coord = (next_order[2], next_order[3])
+		next_coord = (next_order[5], next_order[6])
+		our_kind = self.our_kind
+		our_number = next_order[4]
 
-		for alternative in alternatives:
-			next_order = alternative[1]
-			next_order = self.smart_move_filter(next_order, current_board)
-			our_coord = (next_order[2], next_order[3])
-			next_coord = (next_order[5], next_order[6])
-			our_kind = self.our_kind
-			our_number = next_order[4]
+		try:
+			next_cell = next_board.grid[next_coord]
+			# Remove our position from the board
+			print 'generate_next_board - next_order', next_order
+			del next_board.grid[our_coord]
+			other_coord = next_coord
+			other_kind = next_cell[0]
+			other_number = next_cell[1]
 
-			try:
-				next_cell = next_board.grid[next_coord]
-				# Remove our position from the board
-				del next_board.grid[our_coord]
-
-				other_coord = next_coord
-				other_kind = next_cell[0]
-				other_number = next_cell[1]
-
-				if other_kind == self.other_kind:
-					if our_number >= other_number:
-						if our_number >= int(1.5 * other_number) + 1:
-							next_board.grid[other_coord] = (our_kind, our_number)
-						else:
-							next_board.grid[other_coord] = (our_kind, float((2.0/3)*our_number))
+			if other_kind == self.other_kind:
+				if our_number >= other_number:
+					if our_number >= int(1.5 * other_number) + 1:
+						next_board.grid[other_coord] = (our_kind, our_number)
 					else:
-						if other_number >= 1.5 *our_number:
-							next_board.grid[other_coord] = (other_kind, other_number)
-						else:
-							next_board.grid[other_coord] = (other_kind, float(other_number - (2.0/3)*our_number))
-
-				elif other_kind == 'h':
-					if our_number >= other_number:
-						next_board.grid[other_coord] = (our_kind, our_number + other_number)
-					else:
-						# We will die
+						next_board.grid[other_coord] = (our_kind, float((2.0/3)*our_number))
+				else:
+					if other_number >= 1.5 *our_number:
 						next_board.grid[other_coord] = (other_kind, other_number)
+					else:
+						next_board.grid[other_coord] = (other_kind, float(other_number - (2.0/3)*our_number))
 
-				elif other_kind == self.our_kind:
-					# The merge is supposed to stay on the one with the highest number (not realistic I know)
-					if our_number <= other_number:
-						try:
-							next_board.grid[other_coord] = (our_kind, our_number + other_number)
-						except:
-							# If we are here it should mean that 2 groups of the same size chose to merge and we are retrying to change the position in the board
-							pass
-			except:
-				# The target cell is void
-				del next_board.grid[our_coord]
-				next_board.grid[next_coord] = (our_kind, our_number)
+			elif other_kind == 'h':
+				if our_number >= other_number:
+					next_board.grid[other_coord] = (our_kind, our_number + other_number)
+				else:
+					# We will die
+					next_board.grid[other_coord] = (other_kind, other_number)
+
+			elif other_kind == self.our_kind:
+				# The merge is supposed to stay on the one with the highest number (not realistic I know)
+				if our_number <= other_number:
+					try:
+						next_board.grid[other_coord] = (our_kind, our_number + other_number)
+					except:
+						# If we are here it should mean that 2 groups of the same size chose to merge and we are retrying to change the position in the board
+						pass
+		except:
+			# The target cell is void
+			print 'in the except !!'
+			del next_board.grid[(next_order[2], next_order[3])]
+			next_board.grid[next_coord] = (our_kind, our_number)
 		return next_board
 
 	def smart_move_filter(self, mov, current_board):
@@ -595,6 +598,10 @@ class Stuxnet():
 							pass
 					if not ennemy_near:
 						ordered_list.append([move, current_board.grid[move][1]])
+				elif current_board.grid[move][1]>our_position.number:
+					ordered_list.append([move, -2])
+				else:
+					ordered_list.append([move, 0])
 			except:
 				ennemy_near = False
 				for x,y in [(move[0]+i, move[1]+j) for i in (-1,0,1) for j in (-1,0,1) if i != 0 or j != 0]:
