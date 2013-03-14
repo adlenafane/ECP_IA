@@ -42,19 +42,6 @@ def findNextMove(coord_start, coord_goal):
 
 
 
-def attack(targetPosition):
-    """
-    entree: tuple de coordonnes de la cellule a attaquer et board
-    nb: faire un test si la cellule cible est bien une cellule a notre portee
-    retourne: le send correctement formaté
-    """
-    adjacentsList=getAdjacentPositions(targetPosition)
-    if checkPresence(adjacentsList,config.board)==False:
-        return "Cellule hors de portee"
-    else:
-        #Lancer ordre attaque
-        return send(sock,"ATK",targetPosition[0],targetPosition[1])
-
 def checkPresence(adjacentsList):
     """
     Entree: liste de tuples de positions
@@ -174,12 +161,6 @@ def randomPossibleNextCoord(coord_start):
 
     
 
-
-def go_attack_ennemies(any_board, position):
-    """
-
-    """ 
-
 class VectorPosition():
     def __init__(self, kind, coord, number):
         self.kind = kind   # 'v', 'w' or 'h'
@@ -187,15 +168,6 @@ class VectorPosition():
         self.number = number
         self.x=coord[0]
         self.y=coord[1]
-"""
-    def kind(self):
-        return self.kind
-
-    def coord(self):
-        return self.coord
-
-    def number(self):
-        return self.number"""
 
 
 
@@ -403,7 +375,7 @@ class Board():
 
         # Anti-suicide fix :)
         if self.our_number() == 0:
-            return -k
+            return -10*k
 
         # Estocade fix
         if self.ennemy_number() == 0:
@@ -411,10 +383,10 @@ class Board():
         # - 20*self.human_number()
 
         return (k \
-            + 20*self.our_number() \
-            - 21*self.ennemy_number()  #ennemy kill is more valuable than our growth to prevent jumping on adjacent human when we have the occasion to kill ennemies\
+            + 10*self.our_number() \
+            - 11*self.ennemy_number()  #ennemy kill is more valuable than our growth to prevent jumping on adjacent human when we have the occasion to kill ennemies\
             - self.sum_min_distance_us_human_delta() \
-            + self.sum_min_distance_us_ennemy_delta() \
+            + 2*self.sum_min_distance_us_ennemy_delta() \
             + self.sum_min_distance_ennemy_human_delta() \
             + dominance*5.0*1.0/(0.1+1.0/5*self.human_number())*self.our_number()/len(self.our_positions())  #encourage merge  \
             + (1-dominance)*50.0*1.0/(0.1+1.0/5*self.human_number())*len(self.our_positions())/self.our_number())  #encourage small groups

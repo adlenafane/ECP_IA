@@ -21,21 +21,6 @@ def alternatives_same_target_clean(input_alternatives):
 	return alternatives
 
 
-"""	alternatives = input_alternatives
-	idx_to_del=[]
-
-	for i in range(len(alternatives)):
-		target = alternatives[i][3]
-		print "alternatives[i][3]: ", target
-		for j in range(i+1,len(alternatives)):
-			if alternatives[j][3]==target and alternatives[j][4]!=config.nous: 
-				idx_to_del.append(j) #the alternative with same target and worse score of another alternative is removed from the list of alternatives if it's not a merge
-		
-	for index in sorted(idx_to_del, reverse = True):  # if items were poped out during the for statement above, every time an item is poped generates an item out of range in the next iterations !
-		del alternatives[index]                       # Note that you need to delete them in reverse order so that you don't throw off the subsequent indexes.
-
-	return alternatives"""
-
 
 class Stuxnet():
 	""" Class to handle our AI"""
