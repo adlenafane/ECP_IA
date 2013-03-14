@@ -175,6 +175,7 @@ class Conductor():
 		'''
 		if depth == 0:
 			print 'depht 0 - move', current_move
+			print 'depht 0 - board', current_move[1].print_board()
 			return current_move
 
 		# Handle our first move to have good first orders
@@ -193,7 +194,7 @@ class Conductor():
 				print 'alphabeta move', move
 				computed_move = self.alphabeta(-player, (board.score(), board, move[1]), depth-1, False, alpha, beta)
 				best_moves.append(computed_move)
-			print 'alphabeta - best_moves - first_iteration', best_moves
+			print 'alphabeta - best_moves - first_iteration - best moves', best_moves
 			try:
 				return sorted(best_moves, key=itemgetter(0), reverse=True)[0]
 			except:
@@ -216,18 +217,25 @@ class Conductor():
 				board = move[0]
 				# Keep the current_move[2] means keep the order, which should be the first we have to make to get there
 				computed_move = self.alphabeta(-player, (board.score(), board, current_move[2]), depth-1, False, alpha, beta)
-				alpha = max(alpha, computed_move[0])
+				try:
+					alpha = max(alpha, computed_move[0])
+				except:
+					pass
 				print 'alphabeta - alpha', alpha
 				if beta <= alpha:
 					break
 				best_moves.append(computed_move)
-			best_moves = sorted(best_moves, key=itemgetter(0), reverse=True)
 			try:
+				best_moves = sorted(best_moves, key=itemgetter(0), reverse=True)
 				return best_moves[0]
 			except:
 				return []
 
 		elif config.timer_ok:
+			# Set the correct kind
+			self.other_ia.our_kind = config.eux
+			self.other_ia.other_kind = config.nous
+
 			computed_move = []
 			self.other_ia.update_game_graph(current_board)
 			next_moves = self.other_ia.find_smart_move()
@@ -236,13 +244,17 @@ class Conductor():
 			best_moves = []
 			for move in next_moves:
 				board = move[0]
-				computed_move = self.alphabeta(player, (board.score(), board, current_move[2]), depth-1, False, alpha, beta)
-				beta = min(beta, computed_move[0])
+				computed_move = self.alphabeta(-player, (board.score(), board, current_move[2]), depth-1, False, alpha, beta)
+				try:
+					beta = min(beta, computed_move[0])
+				except:
+					pass
 				print 'alphabeta - beta', beta
 				if beta <= alpha:
 					break
-			best_moves = sorted(best_moves, key=itemgetter(0), reverse=True)
+				best_moves.append(computed_move)
 			try:
+				best_moves = sorted(best_moves, key=itemgetter(0))
 				return best_moves[0]
 			except:
 				return []
