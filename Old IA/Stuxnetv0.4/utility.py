@@ -174,13 +174,6 @@ def randomPossibleNextCoord(coord_start):
 
 
 
-    
-
-
-def go_attack_ennemies(any_board, position):
-    """
-
-    """
 
 class VectorPosition():
     def __init__(self, kind, coord, number):
@@ -189,15 +182,6 @@ class VectorPosition():
         self.number = number
         self.x=coord[0]
         self.y=coord[1]
-"""
-    def kind(self):
-        return self.kind
-
-    def coord(self):
-        return self.coord
-
-    def number(self):
-        return self.number"""
 
 
 
