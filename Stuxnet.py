@@ -18,6 +18,22 @@ log_file = open("./log/message"+str(int(round(time.time() * 1000)))+".log","w")
 
 sys.stdout = log_file
 
+with open('parameters.txt', 'r') as f:
+    ip = f.readline().rstrip()
+    port = f.readline().rstrip()
+    ai_linear = f.readline().rstrip()
+    print ip
+    print port
+    print ai_linear
+
+    if ip != '' and port != '':
+        config.address = (str(ip), int(port))
+        print 'config.address', config.address
+    if ai_linear == 'True':
+        config.ai_linear = True
+    else:
+        config.ai_linear = False
+
 
 data = []
 nb_tours = 0
