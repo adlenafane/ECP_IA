@@ -176,15 +176,20 @@ while True:
         #print "ennemy_positions"
         #pprint(current_board.ennemy_positions())
 
-        # stuxnet.update_game_graph(current_board)
-        
         #calculez votre coup
+
+        if config.ai_linear:
+            stuxnet.update_game_graph(current_board)
+            next_moves = stuxnet.find_smart_move()
+            next_move = next_moves[0]
+            order = next_move[1]
+            send_order(sock, order)
         
-        our_timer=Timer(4.0, return_best_order, [sock])
-        our_timer.start()
-        config.timer_ok = True
-        conductor.IDDFS(current_board, 1)
-        #conductor.minmax_smart(1, current_board)
+        else:
+            our_timer=Timer(4.0, return_best_order, [sock])
+            our_timer.start()
+            config.timer_ok = True
+            conductor.IDDFS(current_board, 1)
         
 
         print "#################### fin du UPD ###################"

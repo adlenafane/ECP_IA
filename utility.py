@@ -382,15 +382,26 @@ class Board():
             return 10*k
         # - 20*self.human_number()
 
-        return (k \
+        if config.ai_linear:
+            return (k \
             + 20*self.our_number() \
             - 21*self.ennemy_number() #ennemy kill is more valuable than our growth to prevent jumping on adjacent human when we have the occasion to kill ennemies\
-            - 20*self.sum_min_distance_us_human_delta() \
-            + 20*self.sum_min_distance_us_ennemy_delta() \
-            + 20*self.sum_min_distance_ennemy_human_delta() \
-            # + dominance*5.0*1.0/(0.1+1.0/5*self.human_number())*self.our_number()/len(self.our_positions())  #encourage merge  \
-            # + (1-dominance)*50.0*1.0/(0.1+1.0/5*self.human_number())*len(self.our_positions())/self.our_number()  #encourage small groups
+            - self.sum_min_distance_us_human_delta() \
+            + self.sum_min_distance_us_ennemy_delta() \
+            + self.sum_min_distance_ennemy_human_delta() \
+            + dominance*5.0*1.0/(0.1+1.0/5*self.human_number())*self.our_number()/len(self.our_positions())  #encourage merge  \
+            + (1-dominance)*50.0*1.0/(0.1+1.0/5*self.human_number())*len(self.our_positions())/self.our_number()  #encourage small groups
             )
+        else:
+            return (k \
+                + 20*self.our_number() \
+                - 21*self.ennemy_number() #ennemy kill is more valuable than our growth to prevent jumping on adjacent human when we have the occasion to kill ennemies\
+                - 20*self.sum_min_distance_us_human_delta() \
+                + 20*self.sum_min_distance_us_ennemy_delta() \
+                + 20*self.sum_min_distance_ennemy_human_delta() \
+                # + dominance*5.0*1.0/(0.1+1.0/5*self.human_number())*self.our_number()/len(self.our_positions())  #encourage merge  \
+                # + (1-dominance)*50.0*1.0/(0.1+1.0/5*self.human_number())*len(self.our_positions())/self.our_number()  #encourage small groups
+                )
 
 
 
