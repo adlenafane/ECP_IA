@@ -1,4 +1,3 @@
-
 ECP_IA
 ======
 
@@ -18,19 +17,8 @@ Done
 ToDo
 ----
 
-* ajouter au top 10 des alternatives la meilleure alternative valide pour toujours envoyer des mov de 3 ordres quand on peut (vérifier qu'il en existe une...) 
-
-* implémenter minimax
-
 * multiprocessing... =)
 
 * battle stuxnet - stuxnet avec différents coefs heuristiques pour fine tuning
 
 * Avoir la possibilité d'enlever les logs (1.2M de lignes ça commence à faire beaucoup et ça doit ralentir)
-
-
-
-secondaire:
-* élaguer les triplets d'alternatives considérées
-* Mettre le choix de l'IP dans un fichier externe (type xml ou txt) pour pouvoir exporter en exe tranquille
-* rapport 
